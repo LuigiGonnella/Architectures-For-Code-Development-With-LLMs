@@ -1,0 +1,7 @@
+[
+  {
+    "id": "smoke_test",
+    "signature": "def add(a, b):",
+    "docstring": "Return the sum of a and b."
+  }
+]
