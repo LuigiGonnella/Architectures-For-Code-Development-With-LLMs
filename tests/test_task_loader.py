@@ -9,19 +9,15 @@ from src.utils.task_loader import load_tasks
 def test_load_valid_tasks():
     """Test loading a valid task file"""
     tasks_data = [
-        {
-            "id": "test1",
-            "signature": "def foo():",
-            "docstring": "A test function"
-        },
+        {"id": "test1", "signature": "def foo():", "docstring": "A test function"},
         {
             "id": "test2",
             "signature": "def bar(x: int):",
-            "docstring": "Another test function"
-        }
+            "docstring": "Another test function",
+        },
     ]
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(tasks_data, f)
         temp_path = f.name
 
@@ -42,11 +38,11 @@ def test_load_tasks_with_extra_fields():
             "signature": "def foo():",
             "docstring": "A test function",
             "difficulty": "Easy",
-            "examples": []
+            "examples": [],
         }
     ]
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(tasks_data, f)
         temp_path = f.name
 
@@ -68,7 +64,7 @@ def test_load_tasks_missing_field():
         }
     ]
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(tasks_data, f)
         temp_path = f.name
 
@@ -84,10 +80,10 @@ def test_load_tasks_not_a_list():
     tasks_data = {
         "id": "test1",
         "signature": "def foo():",
-        "docstring": "A test function"
+        "docstring": "A test function",
     }
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(tasks_data, f)
         temp_path = f.name
 
@@ -106,7 +102,7 @@ def test_load_tasks_file_not_found():
 
 def test_load_tasks_invalid_json():
     """Test that loading invalid JSON raises JSONDecodeError"""
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         f.write("{ invalid json }")
         temp_path = f.name
 
@@ -121,7 +117,7 @@ def test_load_empty_task_list():
     """Test that loading empty task list works"""
     tasks_data = []
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(tasks_data, f)
         temp_path = f.name
 

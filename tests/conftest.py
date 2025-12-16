@@ -1,6 +1,7 @@
 """
 Pytest configuration and shared fixtures.
 """
+
 import pytest
 
 
@@ -10,7 +11,7 @@ def sample_task():
     return {
         "id": "test_add",
         "signature": "def add(a: int, b: int) -> int:",
-        "docstring": "Return the sum of a and b."
+        "docstring": "Return the sum of a and b.",
     }
 
 
@@ -21,11 +22,11 @@ def sample_tasks():
         {
             "id": "test_add",
             "signature": "def add(a: int, b: int) -> int:",
-            "docstring": "Return the sum of a and b."
+            "docstring": "Return the sum of a and b.",
         },
         {
             "id": "test_multiply",
             "signature": "def multiply(a: int, b: int) -> int:",
-            "docstring": "Return the product of a and b."
-        }
+            "docstring": "Return the product of a and b.",
+        },
     ]

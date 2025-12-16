@@ -6,14 +6,14 @@ from src.core.agent import (
     plan_solution,
     generate_code,
     review_code,
-    refine_code
+    refine_code,
 )
 
 
 @pytest.fixture
 def mock_llm():
     """Fixture to mock the call_llm function"""
-    with patch('src.core.agent.call_llm') as mock:
+    with patch("src.core.agent.call_llm") as mock:
         yield mock
 
 
@@ -24,7 +24,7 @@ def test_analyze_task(mock_llm):
     result = analyze_task(
         signature="def foo(x: int) -> int:",
         docstring="Return x + 1",
-        model="test-model"
+        model="test-model",
     )
 
     assert result == "Analysis result"
@@ -32,27 +32,24 @@ def test_analyze_task(mock_llm):
 
     # Check that the prompt contains key elements
     call_args = mock_llm.call_args
-    prompt = call_args.kwargs['user_prompt']
+    prompt = call_args.kwargs["user_prompt"]
     assert "Analyze the following programming task" in prompt
     assert "def foo(x: int) -> int:" in prompt
     assert "Return x + 1" in prompt
-    assert call_args.kwargs['model'] == "test-model"
+    assert call_args.kwargs["model"] == "test-model"
 
 
 def test_plan_solution(mock_llm):
     """Test plan_solution calls LLM with correct prompt structure"""
     mock_llm.return_value = "Step 1: ...\nStep 2: ..."
 
-    result = plan_solution(
-        analysis="Task requires incrementing x",
-        model="test-model"
-    )
+    result = plan_solution(analysis="Task requires incrementing x", model="test-model")
 
     assert result == "Step 1: ...\nStep 2: ..."
     mock_llm.assert_called_once()
 
     call_args = mock_llm.call_args
-    prompt = call_args.kwargs['user_prompt']
+    prompt = call_args.kwargs["user_prompt"]
     assert "step-by-step plan" in prompt
     assert "Task requires incrementing x" in prompt
 
@@ -62,16 +59,14 @@ def test_generate_code(mock_llm):
     mock_llm.return_value = "def foo(x: int) -> int:\n    return x + 1"
 
     result = generate_code(
-        signature="def foo(x: int) -> int:",
-        plan="1. Return x + 1",
-        model="test-model"
+        signature="def foo(x: int) -> int:", plan="1. Return x + 1", model="test-model"
     )
 
     assert "def foo(x: int) -> int:" in result
     mock_llm.assert_called_once()
 
     call_args = mock_llm.call_args
-    prompt = call_args.kwargs['user_prompt']
+    prompt = call_args.kwargs["user_prompt"]
     assert "generate the Python function" in prompt
     assert "def foo(x: int) -> int:" in prompt
     assert "1. Return x + 1" in prompt
@@ -88,7 +83,7 @@ def test_review_code(mock_llm):
     mock_llm.assert_called_once()
 
     call_args = mock_llm.call_args
-    prompt = call_args.kwargs['user_prompt']
+    prompt = call_args.kwargs["user_prompt"]
     assert "Review the Python code" in prompt
     assert code in prompt
 
@@ -100,17 +95,13 @@ def test_refine_code(mock_llm):
     original_code = "def foo(x):\n    return x + 1"
     review = "Missing type hint on return"
 
-    result = refine_code(
-        code=original_code,
-        review=review,
-        model="test-model"
-    )
+    result = refine_code(code=original_code, review=review, model="test-model")
 
     assert "def foo(x: int) -> int:" in result
     mock_llm.assert_called_once()
 
     call_args = mock_llm.call_args
-    prompt = call_args.kwargs['user_prompt']
+    prompt = call_args.kwargs["user_prompt"]
     assert original_code in prompt
     assert review in prompt
     assert "fix the code" in prompt

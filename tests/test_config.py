@@ -24,7 +24,7 @@ def test_config_custom_values():
         model_name="custom-model",
         temperature=0.5,
         max_retries=5,
-        data_dir="/custom/path"
+        data_dir="/custom/path",
     )
 
     assert custom_config.model_name == "custom-model"
