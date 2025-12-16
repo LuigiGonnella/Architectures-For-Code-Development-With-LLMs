@@ -1,11 +1,17 @@
 from langgraph.graph import StateGraph, START, END
 from src.core.state import AgentState
-from src.core import agent
+from src.core.agent import (
+    analyze_task,
+    plan_solution,
+    generate_code,
+    review_code,
+    refine_code,
+)
 
 
 def analysis_node(state: AgentState) -> AgentState:
     print(">> ANALYSIS NODE")
-    state["analysis"] = agent.analyze_task(
+    state["analysis"] = analyze_task(
         signature=state["signature"],
         docstring=state["docstring"],
         model=state["model"],
@@ -15,7 +21,7 @@ def analysis_node(state: AgentState) -> AgentState:
 
 def planning_node(state: AgentState) -> AgentState:
     print(">> PLANNING NODE")
-    state["plan"] = agent.plan_solution(
+    state["plan"] = plan_solution(
         analysis=state["analysis"],
         model=state["model"],
     )
@@ -24,7 +30,7 @@ def planning_node(state: AgentState) -> AgentState:
 
 def generation_node(state: AgentState) -> AgentState:
     print(">> GENERATION NODE")
-    state["code"] = agent.generate_code(
+    state["code"] = generate_code(
         signature=state["signature"],
         plan=state["plan"],
         model=state["model"],
@@ -34,7 +40,7 @@ def generation_node(state: AgentState) -> AgentState:
 
 def review_node(state: AgentState) -> AgentState:
     print(">> REVIEW NODE")
-    state["review"] = agent.review_code(
+    state["review"] = review_code(
         code=state["code"],
         model=state["model"],
     )
@@ -43,7 +49,7 @@ def review_node(state: AgentState) -> AgentState:
 
 def refinement_node(state: AgentState) -> AgentState:
     print(">> REFINEMENT NODE")
-    state["code"] = agent.refine_code(
+    state["code"] = refine_code(
         code=state["code"],
         review=state["review"],
         model=state["model"],
