@@ -10,7 +10,7 @@ Low-level LLM runtime for the project.
 import ollama
 import time
 from typing import Optional
-
+from src.utils.config import ModelConfig
 
 DEFAULT_SYSTEM_PROMPT = """
 You are a single autonomous coding agent.
@@ -21,14 +21,15 @@ planning, code generation, self-evaluation, and refinement.
 You always act as one agent with one identity.
 """
 
+CONFIG = ModelConfig()
+
+
 
 def call_llm(
     *,
     user_prompt: str,
     model: str,
     system_prompt: Optional[str] = None,
-    temperature: float = 0.0,
-    max_retries: int = 2,
 ) -> str:
     """
     Core LLM call used by ALL agent nodes.
@@ -41,7 +42,7 @@ def call_llm(
 
     sys_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
 
-    for attempt in range(max_retries + 1):
+    for attempt in range(CONFIG.max_retries + 1):
         try:
             response = ollama.chat(
                 model=model,
@@ -50,12 +51,12 @@ def call_llm(
                     {"role": "user", "content": user_prompt},
                 ],
                 options={
-                    "temperature": temperature,
+                    "temperature": CONFIG.temperature,
                 },
             )
             return response["message"]["content"]
 
         except Exception as e:
-            if attempt == max_retries:
+            if attempt == CONFIG.max_retries:
                 raise e
             time.sleep(0.5)
