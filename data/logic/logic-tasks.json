@@ -1,0 +1,94 @@
+[
+    {
+        "id": "fizzbuzz",
+        "signature": "def fizzbuzz(n: int) -> list:",
+        "docstring": "Return a list of strings from 1 to n where: multiples of 3 are 'Fizz', multiples of 5 are 'Buzz', multiples of both are 'FizzBuzz', and other numbers are their string representation.",
+        "examples": [
+            {
+                "input": "15",
+                "output": "['1', '2', 'Fizz', '4', 'Buzz', 'Fizz', '7', '8', 'Fizz', 'Buzz', '11', 'Fizz', '13', '14', 'FizzBuzz']"
+            },
+            {
+                "input": "5",
+                "output": "['1', '2', 'Fizz', '4', 'Buzz']"
+            }
+        ],
+        "difficulty": "Easy"
+    },
+    {
+        "id": "sudoku_validator",
+        "signature": "def is_valid_sudoku(board: list[list[str]]) -> bool:",
+        "docstring": "Determine if a 9x9 Sudoku board is valid. Only filled cells (1-9) need to be validated. Empty cells are represented by '.'. Each row, column, and 3x3 sub-box must contain digits 1-9 without repetition.",
+        "examples": [
+            {
+                "input": "[['5','3','.','.','7','.','.','.','.'],['6','.','.','1','9','5','.','.','.'],['.','9','8','.','.','.','.','6','.'],['8','.','.','.','6','.','.','.','3'],['4','.','.','8','.','3','.','.','1'],['7','.','.','.','2','.','.','.','6'],['.','6','.','.','.','.','2','8','.'],['.','.','.','4','1','9','.','.','5'],['.','.','.','.','8','.','.','7','9']]",
+                "output": "True"
+            },
+            {
+                "input": "[['8','3','.','.','7','.','.','.','.'],['6','.','.','1','9','5','.','.','.'],['.','9','8','.','.','.','.','6','.'],['8','.','.','.','6','.','.','.','3'],['4','.','.','8','.','3','.','.','1'],['7','.','.','.','2','.','.','.','6'],['.','6','.','.','.','.','2','8','.'],['.','.','.','4','1','9','.','.','5'],['.','.','.','.','8','.','.','7','9']]",
+                "output": "False"
+            }
+        ],
+        "difficulty": "Medium"
+    },
+    {
+        "id": "next_permutation",
+        "signature": "def next_permutation(nums: list[int]) -> list[int]:",
+        "docstring": "Rearrange numbers into the lexicographically next greater permutation. If no such permutation exists, return the lowest possible order (sorted in ascending order). Modify the list in-place and return it.",
+        "examples": [
+            {
+                "input": "[1, 2, 3]",
+                "output": "[1, 3, 2]"
+            },
+            {
+                "input": "[3, 2, 1]",
+                "output": "[1, 2, 3]"
+            },
+            {
+                "input": "[1, 1, 5]",
+                "output": "[1, 5, 1]"
+            }
+        ],
+        "difficulty": "Medium"
+    },
+    {
+        "id": "n_queens",
+        "signature": "def solve_n_queens(n: int) -> list[list[str]]:",
+        "docstring": "Solve the N-Queens puzzle: place n queens on an n×n chessboard so no two queens attack each other. Return all distinct solutions where each solution contains board configurations with 'Q' for queen and '.' for empty space.",
+        "examples": [
+            {
+                "input": "4",
+                "output": "[['.Q..', '...Q', 'Q...', '..Q.'], ['..Q.', 'Q...', '...Q', '.Q..']]"
+            },
+            {
+                "input": "1",
+                "output": "[['Q']]"
+            }
+        ],
+        "difficulty": "Hard"
+    },
+    {
+        "id": "expression_evaluator",
+        "signature": "def evaluate_expression(expression: str) -> bool:",
+        "docstring": "Given a string expression with parentheses, AND ('&'), OR ('|'), and NOT ('!') operators, and boolean values ('t' for true, 'f' for false), evaluate the expression and return the result. Parentheses indicate evaluation order.",
+        "examples": [
+            {
+                "input": "'!(f)'",
+                "output": "True"
+            },
+            {
+                "input": "'|(f,t)'",
+                "output": "True"
+            },
+            {
+                "input": "'&(t,f)'",
+                "output": "False"
+            },
+            {
+                "input": "'|(&(t,f,t),!(t))'",
+                "output": "False"
+            }
+        ],
+        "difficulty": "Hard"
+    }
+]

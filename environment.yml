@@ -13,3 +13,4 @@ dependencies:
       - ollama
       - black
       - ruff
+      - pytest
