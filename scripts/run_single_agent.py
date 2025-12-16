@@ -1,11 +1,24 @@
+import argparse
+
 from src.core.pipeline import build_single_agent_graph
 from src.utils.task_loader import load_tasks
 from src.utils.config import Config
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Run single-agent code generation pipeline"
+    )
+    parser.add_argument(
+        "task_file",
+        nargs="?",
+        default="data/test-tasks.json",
+        help="Path to task file (e.g., data/logic/logic-tasks.json)",
+    )
+    args = parser.parse_args()
+
     graph = build_single_agent_graph()
-    tasks = load_tasks("./data/test-tasks.json")
+    tasks = load_tasks(args.task_file)
 
     for task in tasks:
         state = {
@@ -29,4 +42,9 @@ def main():
 if __name__ == "__main__":
     main()
 
-# python -m scripts.run_single_agent
+
+# Usage examples:
+# python -m scripts.run_single_agent                              # uses default (data/test-tasks.json)
+# python -m scripts.run_single_agent data/logic/logic-tasks.json  # run logic tasks
+# python -m scripts.run_single_agent data/strings/strings-tasks.json
+# python -m scripts.run_single_agent data/dsa/dsa-tasks.json
