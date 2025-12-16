@@ -94,7 +94,7 @@ pip install -r requirements.txt
 ```
 4. Run the single-agent pipeline
 ```
-python scripts/run_single_agent.py
+python -m scripts.run_single_agent
 ```
 Sample Task (data/test-tasks.json)
 ```
