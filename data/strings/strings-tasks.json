@@ -1,0 +1,98 @@
+[
+    {
+        "id": "count_vowels",
+        "signature": "def count_vowels(s: str) -> int:",
+        "docstring": "Count the number of vowels (a, e, i, o, u) in the input string, case-insensitive.",
+        "examples": [
+            {
+                "input": "'OpenAI ChatGPT'",
+                "output": "5"
+            },
+            {
+                "input": "'Hello World'",
+                "output": "3"
+            }
+        ],
+        "difficulty": "Easy"
+    },
+    {
+        "id": "is_palindrome",
+        "signature": "def is_palindrome(s: str) -> bool:",
+        "docstring": "Check if the input string is a palindrome (reads the same forwards and backwards), ignoring spaces, punctuation, and case.",
+        "examples": [
+            {
+                "input": "'racecar'",
+                "output": "True"
+            },
+            {
+                "input": "'A man a plan a canal Panama'",
+                "output": "True"
+            },
+            {
+                "input": "'hello'",
+                "output": "False"
+            }
+        ],
+        "difficulty": "Medium"
+    },
+    {
+        "id": "compress_string",
+        "signature": "def compress_string(s: str) -> str:",
+        "docstring": "Compress the string using run-length encoding. For example, 'aaabbbcc' becomes 'a3b3c2'. If the compressed string is not shorter than the original, return the original string.",
+        "examples": [
+            {
+                "input": "'aaabbbcc'",
+                "output": "'a3b3c2'"
+            },
+            {
+                "input": "'abcd'",
+                "output": "'abcd'"
+            },
+            {
+                "input": "'aabbccddee'",
+                "output": "'a2b2c2d2e2'"
+            }
+        ],
+        "difficulty": "Medium"
+    },
+    {
+        "id": "longest_substring_without_repeating",
+        "signature": "def longest_substring_without_repeating(s: str) -> int:",
+        "docstring": "Find the length of the longest substring without repeating characters.",
+        "examples": [
+            {
+                "input": "'abcabcbb'",
+                "output": "3"
+            },
+            {
+                "input": "'bbbbb'",
+                "output": "1"
+            },
+            {
+                "input": "'pwwkew'",
+                "output": "3"
+            }
+        ],
+        "difficulty": "Hard"
+    },
+    {
+        "id": "group_anagrams",
+        "signature": "def group_anagrams(strs: list[str]) -> list[list[str]]:",
+        "docstring": "Group strings that are anagrams of each other. Return a list of lists where each inner list contains anagrams.",
+        "examples": [
+            {
+                "input": "['eat', 'tea', 'tan', 'ate', 'nat', 'bat']",
+                "output": "[['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]"
+            },
+            {
+                "input": "['']",
+                "output": "[['']]"
+            },
+            {
+                "input": "['a']",
+                "output": "[['a']]"
+            }
+        ],
+        "difficulty": "Hard"
+    }
+]
