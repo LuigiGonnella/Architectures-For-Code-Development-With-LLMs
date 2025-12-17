@@ -3,7 +3,9 @@ import pytest
 
 # Task implementations (to be tested)
 def fizzbuzz(n: int) -> list:
-    """Return a list of strings from 1 to n where: multiples of 3 are 'Fizz', multiples of 5 are 'Buzz', multiples of both are 'FizzBuzz', and other numbers are their string representation."""
+    """Return a list of strings from 1 to n where: multiples of 3 are 'Fizz', multiples of 5 are 'Buzz',
+    multiples of both are 'FizzBuzz', and other numbers are their string representation.
+    """
     if not isinstance(n, int):
         raise TypeError("Input must be an integer")
     if n < 1:
@@ -23,7 +25,9 @@ def fizzbuzz(n: int) -> list:
 
 
 def is_valid_sudoku(board: list[list[str]]) -> bool:
-    """Determine if a 9x9 Sudoku board is valid. Only filled cells (1-9) need to be validated. Empty cells are represented by '.'. Each row, column, and 3x3 sub-box must contain digits 1-9 without repetition."""
+    """Determine if a 9x9 Sudoku board is valid. Only filled cells (1-9) need to be validated.
+    Empty cells are represented by '.'. Each row, column, and 3x3 sub-box must contain digits
+    1-9 without repetition."""
     if not isinstance(board, list) or len(board) != 9:
         raise ValueError("Board must be a 9x9 list")
 
@@ -66,7 +70,9 @@ def is_valid_sudoku(board: list[list[str]]) -> bool:
 
 
 def next_permutation(nums: list[int]) -> list[int]:
-    """Rearrange numbers into the lexicographically next greater permutation. If no such permutation exists, return the lowest possible order (sorted in ascending order). Modify the list in-place and return it."""
+    """Rearrange numbers into the lexicographically next greater permutation.
+    If no such permutation exists, return the lowest possible order (sorted in ascending order).
+    Modify the list in-place and return it."""
     if not isinstance(nums, list):
         raise TypeError("Input must be a list")
 
@@ -91,7 +97,9 @@ def next_permutation(nums: list[int]) -> list[int]:
 
 
 def solve_n_queens(n: int) -> list[list[str]]:
-    """Solve the N-Queens puzzle: place n queens on an n×n chessboard so no two queens attack each other. Return all distinct solutions where each solution contains board configurations with 'Q' for queen and '.' for empty space."""
+    """Solve the N-Queens puzzle: place n queens on an n x n chessboard so no two queens attack each other.
+    Return all distinct solutions where each solution contains board configurations with 'Q'
+    for queen and '.' for empty space."""
     if not isinstance(n, int):
         raise TypeError("Input must be an integer")
     if n < 1:
@@ -139,7 +147,9 @@ def solve_n_queens(n: int) -> list[list[str]]:
 
 
 def evaluate_expression(expression: str) -> bool:
-    """Given a string expression with parentheses, AND ('&'), OR ('|'), and NOT ('!') operators, and boolean values ('t' for true, 'f' for false), evaluate the expression and return the result. Parentheses indicate evaluation order."""
+    """Given a string expression with parentheses, AND ('&'), OR ('|'), and NOT ('!') operators,
+    and boolean values ('t' for true, 'f' for false), evaluate the expression and return the result.
+    Parentheses indicate evaluation order."""
     if not isinstance(expression, str):
         raise TypeError("Input must be a string")
 
