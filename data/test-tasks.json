@@ -2,6 +2,17 @@
   {
     "id": "smoke_test",
     "signature": "def add(a, b):",
-    "docstring": "Return the sum of a and b."
+    "docstring": "Return the sum of a and b.",
+    "examples": [
+      {
+        "input": "2, 3",
+        "output": "5"
+      },
+      {
+        "input": "-1, 1",
+        "output": "0"
+      }
+    ],
+    "difficulty": "exactly"
   }
 ]

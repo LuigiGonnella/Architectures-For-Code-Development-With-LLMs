@@ -15,6 +15,7 @@ def analysis_node(state: AgentState) -> AgentState:
         signature=state["signature"],
         docstring=state["docstring"],
         examples=state.get("examples"),
+        difficulty=state.get("difficulty"),
         model=state["model"],
     )
     return state
@@ -24,6 +25,7 @@ def planning_node(state: AgentState) -> AgentState:
     print(">> PLANNING NODE")
     state["plan"] = plan_solution(
         analysis=state["analysis"],
+        difficulty=state.get("difficulty"),
         model=state["model"],
     )
     return state
