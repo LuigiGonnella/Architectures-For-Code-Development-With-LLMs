@@ -1,8 +1,6 @@
 import argparse
 import os
 import sys
-import json
-
 
 # Ensure project root is on sys.path so `src` package is importable when
 # running this script directly (e.g. `python scripts/run_single_agent.py`).
