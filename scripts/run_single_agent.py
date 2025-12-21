@@ -1,4 +1,14 @@
 import argparse
+import os
+import sys
+import json
+
+
+# Ensure project root is on sys.path so `src` package is importable when
+# running this script directly (e.g. `python scripts/run_single_agent.py`).
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
 
 from src.core.pipeline import build_single_agent_graph
 from src.utils.task_loader import load_tasks
@@ -21,6 +31,18 @@ def main():
     tasks = load_tasks(args.task_file)
 
     for task in tasks:
+        print("\n\nQUERY:")
+        print(f"  ID        : {task.get('id')}")
+        print(f"  Signature : {task.get('signature')}")
+        print(f"  Docstring : {task.get('docstring')}")
+        if task.get('examples'):
+            print("  Examples  :")
+            for ex in task['examples']:
+                print(f"    - Input : {ex.get('input')}")
+                print(f"      Output: {ex.get('output')}")
+        if task.get('difficulty'):
+            print(f"  Difficulty: {task.get('difficulty')}\n\n")
+
         state = {
             "task_id": task["id"],
             "signature": task["signature"],

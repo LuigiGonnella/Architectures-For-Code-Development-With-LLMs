@@ -8,6 +8,7 @@ def below_zero(operations: List[int]) -> bool:
     Your task is to detect if at any point the balance of account falls below zero, and at that point function should return True. 
     Otherwise it should return False.
     """
+    
     if not isinstance(operations, list):
         raise TypeError("Input must be a list")
 
