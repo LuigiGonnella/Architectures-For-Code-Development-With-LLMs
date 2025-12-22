@@ -194,9 +194,12 @@ def review_code(
         "- Identify violations such as unexpected I/O, multiple functions, globals, or side effects\n"
         '- If none are found, explicitly state: "No constraint violations detected"\n\n'
         "### Final Verdict\n"
+        "- IMPORTANT: Base verdict ONLY on functional correctness, NOT on quality metrics\n"
+        "- If code executes successfully and logic is correct, verdict MUST be 'Code is correct'\n"
+        "- Quality issues should be noted above but do NOT affect the verdict\n"
         "- One of the following EXACT statements:\n"
-        '  * "Code is correct"\n'
-        '  * "Code has issues"\n\n'
+        '  * "Code is correct" (functionally correct, even if quality could improve)\n'
+        '  * "Code has issues" (has bugs, logic errors, or execution failures)\n\n'
         "CODE UNDER REVIEW:\n\n"
         f"{code}\n\n"
         "EXECUTION RESULTS:\n\n"
@@ -208,10 +211,11 @@ def review_code(
 
     prompt += (
         "IMPORTANT:\n"
-        '- If execution failed or function_extracted is False, the final verdict MUST be "Code has issues"\n'
-        '- If more than one function name is present, the final verdict MUST be "Code has issues"\n'
-        "- If unexpected output is produced, explicitly mention it\n"
-        "- Quality issues should be mentioned but do NOT affect the final verdict\n"
+        '- If execution failed or function_extracted is False, verdict MUST be "Code has issues"\n'
+        '- If more than one function name is present, verdict MUST be "Code has issues"\n'
+        '- If execution succeeded AND logic is correct, verdict MUST be "Code is correct"\n'
+        "- NEVER let quality metrics alone determine the verdict\n"
+        "- Quality issues go in Code Quality Assessment section, not in verdict\n"
         "- Do NOT be vague or speculative\n"
         "- Do NOT include code blocks or markdown\n"
     )
