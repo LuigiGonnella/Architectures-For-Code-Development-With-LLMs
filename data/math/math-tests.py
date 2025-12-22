@@ -7,6 +7,7 @@ import unittest
 # HumanEval/39 — prime_fib
 # =========================================================
 
+
 def prime_fib(n: int) -> int:
     if not isinstance(n, int):
         raise TypeError("n must be an integer")
@@ -30,21 +31,39 @@ def prime_fib(n: int) -> int:
             return f[-1]
 
 
-
 class TestPrime_fib(unittest.TestCase):
     """Tests for prime_fib"""
 
     # ---- ORIGINAL HumanEval TESTS ----
-    def test_case_1(self): self.assertEqual(prime_fib(1), 2)
-    def test_case_2(self): self.assertEqual(prime_fib(2), 3)
-    def test_case_3(self): self.assertEqual(prime_fib(3), 5)
-    def test_case_4(self): self.assertEqual(prime_fib(4), 13)
-    def test_case_5(self): self.assertEqual(prime_fib(5), 89)
-    def test_case_6(self): self.assertEqual(prime_fib(6), 233)
-    def test_case_7(self): self.assertEqual(prime_fib(7), 1597)
-    def test_case_8(self): self.assertEqual(prime_fib(8), 28657)
-    def test_case_9(self): self.assertEqual(prime_fib(9), 514229)
-    def test_case_10(self): self.assertEqual(prime_fib(10), 433494437)
+    def test_case_1(self):
+        self.assertEqual(prime_fib(1), 2)
+
+    def test_case_2(self):
+        self.assertEqual(prime_fib(2), 3)
+
+    def test_case_3(self):
+        self.assertEqual(prime_fib(3), 5)
+
+    def test_case_4(self):
+        self.assertEqual(prime_fib(4), 13)
+
+    def test_case_5(self):
+        self.assertEqual(prime_fib(5), 89)
+
+    def test_case_6(self):
+        self.assertEqual(prime_fib(6), 233)
+
+    def test_case_7(self):
+        self.assertEqual(prime_fib(7), 1597)
+
+    def test_case_8(self):
+        self.assertEqual(prime_fib(8), 28657)
+
+    def test_case_9(self):
+        self.assertEqual(prime_fib(9), 514229)
+
+    def test_case_10(self):
+        self.assertEqual(prime_fib(10), 433494437)
 
     # ---- ADDED TYPE / DOMAIN TESTS ----
     def test_type_error(self):
@@ -60,6 +79,7 @@ class TestPrime_fib(unittest.TestCase):
 # HumanEval/49 — modp
 # =========================================================
 
+
 def modp(n: int, p: int) -> int:
     if not isinstance(n, int) or not isinstance(p, int):
         raise TypeError("n and p must be integers")
@@ -72,18 +92,30 @@ def modp(n: int, p: int) -> int:
     return ret
 
 
-
 class TestModp(unittest.TestCase):
     """Tests for modp"""
 
     # ---- ORIGINAL HumanEval TESTS ----
-    def test_case_1(self): self.assertEqual(modp(3, 5), 3)
-    def test_case_2(self): self.assertEqual(modp(1101, 101), 2)
-    def test_case_3(self): self.assertEqual(modp(0, 101), 1)
-    def test_case_4(self): self.assertEqual(modp(3, 11), 8)
-    def test_case_5(self): self.assertEqual(modp(100, 101), 1)
-    def test_case_6(self): self.assertEqual(modp(30, 5), 4)
-    def test_case_7(self): self.assertEqual(modp(31, 5), 3)
+    def test_case_1(self):
+        self.assertEqual(modp(3, 5), 3)
+
+    def test_case_2(self):
+        self.assertEqual(modp(1101, 101), 2)
+
+    def test_case_3(self):
+        self.assertEqual(modp(0, 101), 1)
+
+    def test_case_4(self):
+        self.assertEqual(modp(3, 11), 8)
+
+    def test_case_5(self):
+        self.assertEqual(modp(100, 101), 1)
+
+    def test_case_6(self):
+        self.assertEqual(modp(30, 5), 4)
+
+    def test_case_7(self):
+        self.assertEqual(modp(31, 5), 3)
 
     # ---- ADDED TYPE / DOMAIN TESTS ----
     def test_type_error(self):
@@ -98,6 +130,7 @@ class TestModp(unittest.TestCase):
 # =========================================================
 # HumanEval/59 — largest_prime_factor
 # =========================================================
+
 
 def largest_prime_factor(n: int) -> int:
     if not isinstance(n, int):
@@ -120,16 +153,24 @@ def largest_prime_factor(n: int) -> int:
     return largest
 
 
-
 class TestLargest_prime_factor(unittest.TestCase):
     """Tests for largest_prime_factor"""
 
     # ---- ORIGINAL HumanEval TESTS ----
-    def test_case_1(self): self.assertEqual(largest_prime_factor(15), 5)
-    def test_case_2(self): self.assertEqual(largest_prime_factor(27), 3)
-    def test_case_3(self): self.assertEqual(largest_prime_factor(63), 7)
-    def test_case_4(self): self.assertEqual(largest_prime_factor(330), 11)
-    def test_case_5(self): self.assertEqual(largest_prime_factor(13195), 29)
+    def test_case_1(self):
+        self.assertEqual(largest_prime_factor(15), 5)
+
+    def test_case_2(self):
+        self.assertEqual(largest_prime_factor(27), 3)
+
+    def test_case_3(self):
+        self.assertEqual(largest_prime_factor(63), 7)
+
+    def test_case_4(self):
+        self.assertEqual(largest_prime_factor(330), 11)
+
+    def test_case_5(self):
+        self.assertEqual(largest_prime_factor(13195), 29)
 
     # ---- ADDED TYPE / DOMAIN TESTS ----
     def test_type_error(self):
@@ -144,6 +185,7 @@ class TestLargest_prime_factor(unittest.TestCase):
 # =========================================================
 # HumanEval/76 — is_simple_power
 # =========================================================
+
 
 def is_simple_power(x: int, n: int) -> bool:
     if not isinstance(x, int) or not isinstance(n, int):
@@ -164,16 +206,35 @@ class TestIs_simple_power(unittest.TestCase):
     """Tests for is_simple_power"""
 
     # ---- ORIGINAL HumanEval TESTS (ALL 10) ----
-    def test_case_1(self): self.assertEqual(is_simple_power(16, 2), True)
-    def test_case_2(self): self.assertEqual(is_simple_power(143214, 16), False)
-    def test_case_3(self): self.assertEqual(is_simple_power(4, 2), True)
-    def test_case_4(self): self.assertEqual(is_simple_power(9, 3), True)
-    def test_case_5(self): self.assertEqual(is_simple_power(16, 4), True)
-    def test_case_6(self): self.assertEqual(is_simple_power(24, 2), False)
-    def test_case_7(self): self.assertEqual(is_simple_power(128, 4), False)
-    def test_case_8(self): self.assertEqual(is_simple_power(12, 6), False)
-    def test_case_9(self): self.assertEqual(is_simple_power(1, 1), True)
-    def test_case_10(self): self.assertEqual(is_simple_power(1, 12), True)
+    def test_case_1(self):
+        self.assertEqual(is_simple_power(16, 2), True)
+
+    def test_case_2(self):
+        self.assertEqual(is_simple_power(143214, 16), False)
+
+    def test_case_3(self):
+        self.assertEqual(is_simple_power(4, 2), True)
+
+    def test_case_4(self):
+        self.assertEqual(is_simple_power(9, 3), True)
+
+    def test_case_5(self):
+        self.assertEqual(is_simple_power(16, 4), True)
+
+    def test_case_6(self):
+        self.assertEqual(is_simple_power(24, 2), False)
+
+    def test_case_7(self):
+        self.assertEqual(is_simple_power(128, 4), False)
+
+    def test_case_8(self):
+        self.assertEqual(is_simple_power(12, 6), False)
+
+    def test_case_9(self):
+        self.assertEqual(is_simple_power(1, 1), True)
+
+    def test_case_10(self):
+        self.assertEqual(is_simple_power(1, 12), True)
 
     # ---- ADDED TYPE / DOMAIN TESTS ----
     def test_type_error(self):
@@ -188,6 +249,7 @@ class TestIs_simple_power(unittest.TestCase):
 # =========================================================
 # HumanEval/92 — any_int
 # =========================================================
+
 
 def any_int(x: float, y: float, z: float) -> bool:
     for v in (x, y, z):
@@ -204,16 +266,35 @@ class TestAny_int(unittest.TestCase):
     """Tests for any_int"""
 
     # ---- ORIGINAL HumanEval TESTS ----
-    def test_case_1(self): self.assertEqual(any_int(2, 3, 1), True)
-    def test_case_2(self): self.assertEqual(any_int(2.5, 2, 3), False)
-    def test_case_3(self): self.assertEqual(any_int(1.5, 5, 3.5), False)
-    def test_case_4(self): self.assertEqual(any_int(2, 6, 2), False)
-    def test_case_5(self): self.assertEqual(any_int(4, 2, 2), True)
-    def test_case_6(self): self.assertEqual(any_int(2.2, 2.2, 2.2), False)
-    def test_case_7(self): self.assertEqual(any_int(-4, 6, 2), True)
-    def test_case_8(self): self.assertEqual(any_int(2, 1, 1), True)
-    def test_case_9(self): self.assertEqual(any_int(3, 4, 7), True)
-    def test_case_10(self): self.assertEqual(any_int(3.0, 4, 7), False)
+    def test_case_1(self):
+        self.assertEqual(any_int(2, 3, 1), True)
+
+    def test_case_2(self):
+        self.assertEqual(any_int(2.5, 2, 3), False)
+
+    def test_case_3(self):
+        self.assertEqual(any_int(1.5, 5, 3.5), False)
+
+    def test_case_4(self):
+        self.assertEqual(any_int(2, 6, 2), False)
+
+    def test_case_5(self):
+        self.assertEqual(any_int(4, 2, 2), True)
+
+    def test_case_6(self):
+        self.assertEqual(any_int(2.2, 2.2, 2.2), False)
+
+    def test_case_7(self):
+        self.assertEqual(any_int(-4, 6, 2), True)
+
+    def test_case_8(self):
+        self.assertEqual(any_int(2, 1, 1), True)
+
+    def test_case_9(self):
+        self.assertEqual(any_int(3, 4, 7), True)
+
+    def test_case_10(self):
+        self.assertEqual(any_int(3.0, 4, 7), False)
 
     # ---- ADDED TYPE TEST ----
     def test_type_error(self):

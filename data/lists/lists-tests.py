@@ -3,12 +3,13 @@ from typing import List, Tuple
 
 # ===== Test 1 (Easy) =====
 
+
 def below_zero(operations: List[int]) -> bool:
-    """You're given a list of deposit and withdrawal operations on a bank account that starts with zero balance. 
-    Your task is to detect if at any point the balance of account falls below zero, and at that point function should return True. 
+    """You're given a list of deposit and withdrawal operations on a bank account that starts with zero balance.
+    Your task is to detect if at any point the balance of account falls below zero, and at that point function should return True.
     Otherwise it should return False.
     """
-    
+
     if not isinstance(operations, list):
         raise TypeError("Input must be a list")
 
@@ -17,7 +18,7 @@ def below_zero(operations: List[int]) -> bool:
     for op in operations:
         if not isinstance(op, int):
             raise ValueError("List elements must be integers")
-        
+
         balance += op
         if balance < 0:
             return True
@@ -31,19 +32,19 @@ class TestBelowZero(unittest.TestCase):
     # VALID TESTS
     def test_case_1(self):
         self.assertEqual(below_zero([1, 2, -3, 1, 2, -3]), False)
-    
+
     def test_case_2(self):
         self.assertEqual(below_zero([1, 2, -4, 5, 6]), True)
-    
+
     def test_case_3(self):
         self.assertEqual(below_zero([1, -1, 2, -2, 5, -5, 4, -4]), False)
-    
+
     def test_case_4(self):
         self.assertEqual(below_zero([1, -1, 2, -2, 5, -5, 4, -5]), True)
-    
+
     def test_case_5(self):
         self.assertEqual(below_zero([1, -2, 2, -2, 5, -5, 4, -4]), True)
-    
+
     # BUONDARY TESTS
     def test_case_6(self):
         self.assertEqual(below_zero([]), False)
@@ -53,7 +54,7 @@ class TestBelowZero(unittest.TestCase):
 
     def test_case_8(self):
         self.assertEqual(below_zero([-1]), True)
-    
+
     def test_case_9(self):
         self.assertEqual(below_zero([1]), False)
 
@@ -73,19 +74,20 @@ class TestBelowZero(unittest.TestCase):
 
 # ===== Test 2 (Medium) =====
 
+
 def find_closest_elements(numbers: List[float]) -> Tuple[float, float]:
     """From a supplied list of numbers (of length at least two) select and return two that are the closest to each
     other and return them in order (smaller number, larger number).
     """
     if not isinstance(numbers, list):
         raise TypeError("Input must be a list")
-    
+
     if len(numbers) < 2:
         raise ValueError("List must contain at least two elements")
 
     for elem in numbers:
         if not isinstance(elem, (int, float)):
-             raise ValueError("List elements must be numbers")
+            raise ValueError("List elements must be numbers")
 
     closest_pair = None
     distance = None
@@ -110,17 +112,23 @@ class TestFindClosestElements(unittest.TestCase):
 
     # VALID TESTS
     def test_case_1(self):
-        self.assertEqual(find_closest_elements([1.0, 2.0, 3.9, 4.0, 5.0, 2.2]), (3.9, 4.0))
+        self.assertEqual(
+            find_closest_elements([1.0, 2.0, 3.9, 4.0, 5.0, 2.2]), (3.9, 4.0)
+        )
 
     def test_case_2(self):
         self.assertEqual(find_closest_elements([1.0, 2.0, 5.9, 4.0, 5.0]), (5.0, 5.9))
-    
+
     def test_case_3(self):
-        self.assertEqual(find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.2]), (2.0, 2.2))
+        self.assertEqual(
+            find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.2]), (2.0, 2.2)
+        )
 
     def test_case_4(self):
-        self.assertEqual(find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.0]), (2.0, 2.0))
-    
+        self.assertEqual(
+            find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.0]), (2.0, 2.0)
+        )
+
     def test_case_5(self):
         self.assertEqual(find_closest_elements([1.1, 2.2, 3.1, 4.1, 5.1]), (2.2, 3.1))
 
@@ -130,12 +138,14 @@ class TestFindClosestElements(unittest.TestCase):
     # BOUNDARY TESTS
     def test_case_7(self):
         self.assertEqual(find_closest_elements([1.0, 10.0]), (1.0, 10.0))
-    
+
     def test_case_8(self):
         self.assertEqual(find_closest_elements([1.0, 1.0, 1.0, 1.0]), (1.0, 1.0))
-    
+
     def test_case_9(self):
-        self.assertEqual(find_closest_elements([1.0, 1.000001, 2.0, 3.0]), (1.0, 1.000001))
+        self.assertEqual(
+            find_closest_elements([1.0, 1.000001, 2.0, 3.0]), (1.0, 1.000001)
+        )
 
     def test_case_10(self):
         self.assertEqual(find_closest_elements([1, 2.5, 3, 10]), (2.5, 3))
@@ -156,14 +166,15 @@ class TestFindClosestElements(unittest.TestCase):
 
 # ===== Test 3 (Medium) =====
 
+
 def search(lst: List[int]) -> int:
-    """You are given a non-empty list of positive integers. Return the greatest integer that is greater than zero, 
-    and has a frequency greater than or equal to the value of the integer itself. 
+    """You are given a non-empty list of positive integers. Return the greatest integer that is greater than zero,
+    and has a frequency greater than or equal to the value of the integer itself.
     The frequency of an integer is the number of times it appears in the list. If no such a value exist, return -1.
     """
     if not isinstance(lst, list):
         raise TypeError("Input must be a list")
-    
+
     if not lst:
         raise ValueError("List cannot be empty")
 
@@ -171,10 +182,10 @@ def search(lst: List[int]) -> int:
         if not isinstance(i, int):
             raise ValueError("List elements must be integers")
         if i <= 0:
-                raise ValueError("List elements must be positive integers")
+            raise ValueError("List elements must be positive integers")
 
     frq = [0] * (max(lst) + 1)
-    for i in lst:        
+    for i in lst:
         frq[i] += 1
 
     ans = -1
@@ -193,7 +204,12 @@ class TestSearch(unittest.TestCase):
         self.assertEqual(search([2, 3, 3, 2, 2]), 2)
 
     def test_case_2(self):
-        self.assertEqual(search([2, 7, 8, 8, 4, 8, 7, 3, 9, 6, 5, 10, 4, 3, 6, 7, 1, 7, 4, 10, 8, 1]), 1)
+        self.assertEqual(
+            search(
+                [2, 7, 8, 8, 4, 8, 7, 3, 9, 6, 5, 10, 4, 3, 6, 7, 1, 7, 4, 10, 8, 1]
+            ),
+            1,
+        )
 
     def test_case_3(self):
         self.assertEqual(search([3, 2, 8, 2]), 2)
@@ -202,8 +218,11 @@ class TestSearch(unittest.TestCase):
         self.assertEqual(search([8, 8, 3, 6, 5, 6, 4]), -1)
 
     def test_case_5(self):
-        self.assertEqual(search([5, 5, 3, 9, 5, 6, 3, 2, 8, 5, 6, 10, 10, 6, 8, 4, 10, 7, 7, 10, 8]), -1)
-    
+        self.assertEqual(
+            search([5, 5, 3, 9, 5, 6, 3, 2, 8, 5, 6, 10, 10, 6, 8, 4, 10, 7, 7, 10, 8]),
+            -1,
+        )
+
     def test_case_6(self):
         self.assertEqual(search([10]), -1)
 
@@ -213,10 +232,10 @@ class TestSearch(unittest.TestCase):
 
     def test_case_8(self):
         self.assertEqual(search([8, 8, 8, 8, 8, 8, 8, 8]), 8)
-    
+
     def test_case_9(self):
         self.assertEqual(search([4, 1, 4, 1, 4, 4]), 4)
-    
+
     def test_case_10(self):
         self.assertEqual(search([5, 5, 5, 5, 1]), 1)
 
@@ -244,21 +263,22 @@ class TestSearch(unittest.TestCase):
 
 # ===== Test 4 (Hard) =====
 
-def triples_sum_to_zero(l: List[int]) -> bool:
-    """triples_sum_to_zero takes a list of integers as an input. 
+
+def triples_sum_to_zero(numbers: List[int]) -> bool:
+    """triples_sum_to_zero takes a list of integers as an input.
     It returns True if there are three distinct elements in the list that sum to zero, and False otherwise.
     """
-    if not isinstance(l, list):
+    if not isinstance(numbers, list):
         raise TypeError("Input must be a list")
-    
-    for e in l:
+
+    for e in numbers:
         if not isinstance(e, int):
             raise ValueError("List elements must be integers")
 
-    for i in range(len(l)):
-        for j in range(i + 1, len(l)):
-            for k in range(j + 1, len(l)):
-                if l[i] + l[j] + l[k] == 0:
+    for i in range(len(numbers)):
+        for j in range(i + 1, len(numbers)):
+            for k in range(j + 1, len(numbers)):
+                if numbers[i] + numbers[j] + numbers[k] == 0:
                     return True
 
     return False
@@ -298,7 +318,7 @@ class TestTriplesSumToZero(unittest.TestCase):
 
     def test_case_10(self):
         self.assertEqual(triples_sum_to_zero([-10, 5, 5]), True)
-    
+
     def test_case_11(self):
         self.assertEqual(triples_sum_to_zero([1, 2, 3]), False)
 
@@ -321,27 +341,28 @@ class TestTriplesSumToZero(unittest.TestCase):
 
 # ===== Test 5 (Hard) =====
 
+
 def minPath(grid: List[List[int]], k: int) -> List[int]:
     """
-    Given a grid with N rows and N columns (N >= 2) and a positive integer k, each cell of the grid contains a value. 
+    Given a grid with N rows and N columns (N >= 2) and a positive integer k, each cell of the grid contains a value.
     Every integer in the range [1, N * N] inclusive appears exactly once on the cells of the grid.
     You have to find the minimum path of length k in the grid. You can start from any cell, and in each step you can move
     to any of the neighbor cells, in other words, you can go to cells which share an edge with you current cell.
     Please note that a path of length k means visiting exactly k cells (not necessarily distinct).
     You CANNOT go off the grid.
     A path A (of length k) is considered less than a path B (of length k) if after making the ordered lists of the values
-    on the cells that A and B go through (let's call them lst_A and lst_B), lst_A is lexicographically less than lst_B, 
-    in other words, there exist an integer index i (1 <= i <= k) such that lst_A[i] < lst_B[i] and for any j (1 <= j < i) 
+    on the cells that A and B go through (let's call them lst_A and lst_B), lst_A is lexicographically less than lst_B,
+    in other words, there exist an integer index i (1 <= i <= k) such that lst_A[i] < lst_B[i] and for any j (1 <= j < i)
     we have lst_A[j] = lst_B[j].
     It is guaranteed that the answer is unique.
     Return an ordered list of the values on the cells that the minimum path go through.
     """
     if not isinstance(grid, list):
         raise TypeError("Grid must be a list of lists")
-    
+
     if not isinstance(k, int) or k <= 0:
         raise ValueError("k must be a positive integer")
-    
+
     n = len(grid)
     if n < 2:
         raise ValueError("Grid size N must be at least 2")
@@ -400,18 +421,26 @@ class TestMinPath(unittest.TestCase):
         self.assertEqual(minPath([[5, 9, 3], [4, 1, 6], [7, 8, 2]], 1), [1])
 
     def test_case_3(self):
-        self.assertEqual(minPath([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]], 4), [1, 2, 1, 2])
+        self.assertEqual(
+            minPath([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]], 4),
+            [1, 2, 1, 2],
+        )
 
     def test_case_4(self):
-        self.assertEqual(minPath([[8, 14, 9, 2], [6, 4, 13, 15], [5, 7, 1, 12], [3, 10, 11, 16]], 5), [1, 7, 1, 7, 1])
+        self.assertEqual(
+            minPath([[8, 14, 9, 2], [6, 4, 13, 15], [5, 7, 1, 12], [3, 10, 11, 16]], 5),
+            [1, 7, 1, 7, 1],
+        )
 
     def test_case_5(self):
-        self.assertEqual(minPath([[2, 7, 4], [3, 1, 5], [6, 8, 9]], 8), [1, 3, 1, 3, 1, 3, 1, 3])
-    
+        self.assertEqual(
+            minPath([[2, 7, 4], [3, 1, 5], [6, 8, 9]], 8), [1, 3, 1, 3, 1, 3, 1, 3]
+        )
+
     # BOUNDARY TESTS
     def test_case_6(self):
         self.assertEqual(minPath([[1, 2], [3, 4]], 10), [1, 2, 1, 2, 1, 2, 1, 2, 1, 2])
-    
+
     def test_case_7(self):
         self.assertEqual(minPath([[1, 3], [4, 2]], 10), [1, 3, 1, 3, 1, 3, 1, 3, 1, 3])
 
@@ -434,8 +463,8 @@ class TestMinPath(unittest.TestCase):
 
     def test_case_12(self):
         with self.assertRaises(ValueError):
-            minPath([[1, 2], [3, '4']], 3)
-    
+            minPath([[1, 2], [3, "4"]], 3)
+
     def test_case_13(self):
         with self.assertRaises(ValueError):
             minPath([[1, 2], [3, 4]], 0)

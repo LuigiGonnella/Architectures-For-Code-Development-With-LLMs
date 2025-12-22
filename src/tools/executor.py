@@ -1,6 +1,6 @@
 import io
-import sys
 from contextlib import redirect_stdout, redirect_stderr
+
 
 def execute_code(code: str) -> dict:
     """
@@ -25,10 +25,13 @@ def execute_code(code: str) -> dict:
             exec(code, namespace)
         result["success"] = True
         result["output"] = stdout_capture.getvalue()
-        
-        functions = [name for name, obj in namespace.items() 
-                     if callable(obj) and not name.startswith('_')]
-        
+
+        functions = [
+            name
+            for name, obj in namespace.items()
+            if callable(obj) and not name.startswith("_")
+        ]
+
         if functions:
             result["function_extracted"] = True
             result["function_names"] = functions

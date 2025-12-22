@@ -54,7 +54,7 @@ def review_node(state: AgentState) -> AgentState:
     )
 
     print(f"Exec results: {exec_result}")
-    print(f'Reviewer result: {state["review"].split('\n')[-1]}')
+    print(f'Reviewer result: {state["review"].splitlines()[-1]}')
     return state
 
 
@@ -69,10 +69,14 @@ def refinement_node(state: AgentState) -> AgentState:
         refinement_count = state.get("refinement_count", 0)
 
         if refinement_count < max_refinements:
-            print(f'starting refinement {refinement_count+1}/{max_refinements}\n')
+            print(f"starting refinement {refinement_count+1}/{max_refinements}\n")
 
         # EARLY EXIT if code is already correct
-        if "review" in state and "Code is correct" in state["review"] and refinement_count >=1:
+        if (
+            "review" in state
+            and "Code is correct" in state["review"]
+            and refinement_count >= 1
+        ):
             print("Code already correct. Skipping refinement.")
             return state
 
@@ -110,7 +114,6 @@ def refinement_node(state: AgentState) -> AgentState:
             return state
         else:
             print("Refinement incomplete: issues remain.")
-
 
     return state
 
