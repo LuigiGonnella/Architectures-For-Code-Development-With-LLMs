@@ -129,14 +129,16 @@ def generate_code(*, signature: str, plan: str, model: str) -> str:
     return call_llm(user_prompt=prompt, model=model)
 
 
-def review_code(*, code: str, model: str, exec_result: dict) -> str:
+def review_code(
+    *, code: str, model: str, exec_result: dict, quality_metrics: dict = None
+) -> str:
     prompt = (
         "You are a strict and detail-oriented code reviewer and judge.\n"
-        "You must evaluate the given Python code using BOTH static analysis and execution results.\n\n"
+        "You must evaluate the given Python code using execution results and quality metrics.\n\n"
         "ABSOLUTE RULES:\n"
         "- Do NOT rewrite or fix the code\n"
         "- Do NOT suggest alternative implementations unless necessary to explain an issue\n"
-        "- Base your review ONLY on the provided code and execution results\n"
+        "- Base your review ONLY on the provided code, execution results, and quality metrics\n"
         "- Treat execution failures as definitive evidence of incorrectness\n\n"
         "EXECUTION RESULT SCHEMA (AUTHORITATIVE):\n"
         "- success: whether the code executed without raising exceptions\n"
@@ -144,18 +146,29 @@ def review_code(*, code: str, model: str, exec_result: dict) -> str:
         "- output: captured stdout/stderr (must normally be empty)\n"
         "- function_extracted: whether at least one callable function was defined\n"
         "- function_names: list of extracted function names\n\n"
+        "QUALITY METRICS SCHEMA:\n"
+        "- maintainability_index: 0-100 scale (>=80 Excellent, >=60 Good, >=40 Moderate, <40 Poor)\n"
+        "- cyclomatic_complexity: number of decision points (<=5 Simple, <=10 Moderate, >10 Complex)\n"
+        "- lines_of_code: total lines\n"
+        "- halstead_effort: cognitive effort required to understand the code\n\n"
         "EXECUTION INTERPRETATION RULES:\n"
         "- If success is False, the code HAS issues\n"
         "- If error is not None, the code HAS issues\n"
         "- If function_extracted is False, the code HAS issues\n"
         "- If more than one function is defined, the code HAS issues\n"
         "- If output is non-empty, treat it as a potential violation (unexpected I/O)\n\n"
+        "QUALITY INTERPRETATION RULES:\n"
+        "- If maintainability_index < 40, flag as poorly maintainable\n"
+        "- If cyclomatic_complexity > 10, flag as overly complex\n"
+        "- Quality issues alone do NOT make the verdict 'Code has issues'\n"
+        "- Quality issues should be noted for potential refinement\n\n"
         "REVIEW OBJECTIVES:\n"
         "1. Verify execution success and function extraction\n"
         "2. Verify logical correctness via static inspection\n"
         "3. Identify missing or incorrect edge case handling\n"
         "4. Detect violations of the function contract or signature expectations\n"
-        "5. Detect forbidden behavior (I/O, globals, side effects)\n\n"
+        "5. Detect forbidden behavior (I/O, globals, side effects)\n"
+        "6. Assess code quality and maintainability\n\n"
         "OUTPUT FORMAT (MANDATORY):\n"
         "Return your review using the following sections:\n\n"
         "### Execution Results Analysis\n"
@@ -171,6 +184,10 @@ def review_code(*, code: str, model: str, exec_result: dict) -> str:
         "### Edge Case Coverage\n"
         "- Identify missing or incorrectly handled edge cases\n"
         '- If none are missing, explicitly state: "All relevant edge cases appear to be handled"\n\n'
+        "### Code Quality Assessment\n"
+        "- Comment on maintainability based on the metrics\n"
+        "- Comment on complexity and readability\n"
+        "- Suggest improvements if quality is poor (but do NOT rewrite code)\n\n"
         "### Constraint Violations\n"
         "- Identify violations such as unexpected I/O, multiple functions, globals, or side effects\n"
         '- If none are found, explicitly state: "No constraint violations detected"\n\n'
@@ -182,10 +199,17 @@ def review_code(*, code: str, model: str, exec_result: dict) -> str:
         f"{code}\n\n"
         "EXECUTION RESULTS:\n\n"
         f"{exec_result}\n\n"
+    )
+
+    if quality_metrics:
+        prompt += f"QUALITY METRICS:\n\n{quality_metrics}\n\n"
+
+    prompt += (
         "IMPORTANT:\n"
         '- If execution failed or function_extracted is False, the final verdict MUST be "Code has issues"\n'
         '- If more than one function name is present, the final verdict MUST be "Code has issues"\n'
         "- If unexpected output is produced, explicitly mention it\n"
+        "- Quality issues should be mentioned but do NOT affect the final verdict\n"
         "- Do NOT be vague or speculative\n"
         "- Do NOT include code blocks or markdown\n"
     )

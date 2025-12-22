@@ -2,6 +2,7 @@ from langgraph.graph import StateGraph, START, END
 from src.core.state import AgentState
 from src.tools.executor import execute_code
 from src.utils.code_parser import extract_python_code
+from src.evaluation.quality import compute_quality_metrics, format_metrics_report
 from src.core.agent import (
     analyze_task,
     plan_solution,
@@ -47,10 +48,16 @@ def review_node(state: AgentState) -> AgentState:
     exec_result = execute_code(state["code"])
     state["exec_result"] = exec_result
 
+    # Compute quality metrics
+    metrics = compute_quality_metrics(state["code"])
+    state["quality_metrics"] = metrics
+    print(format_metrics_report(metrics))
+
     state["review"] = review_code(
         code=state["code"],
         model=state["model"],
         exec_result=exec_result,
+        quality_metrics=metrics,
     )
 
     print(f"Exec results: {exec_result}")
@@ -100,11 +107,16 @@ def refinement_node(state: AgentState) -> AgentState:
         state["exec_result"] = exec_result
         state["refinement_count"] = refinement_count + 1
 
+        # Recompute quality metrics for refined code
+        metrics = compute_quality_metrics(refined_code)
+        state["quality_metrics"] = metrics
+
         # Re-run reviewer after refinement
         review = review_code(
             code=refined_code,
             exec_result=exec_result,
             model=state["model"],
+            quality_metrics=metrics,
         )
         state["review"] = review
 

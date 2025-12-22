@@ -5,6 +5,7 @@ import sys
 from src.core.pipeline import build_single_agent_graph
 from src.utils.task_loader import load_tasks
 from src.utils.config import config
+from src.evaluation.quality import format_metrics_report
 
 # Ensure project root is on sys.path so `src` package is importable when
 # running this script directly (e.g. `python scripts/run_single_agent.py`).
@@ -53,12 +54,17 @@ def main():
             "code": None,
             "review": None,
             "exec_result": None,
+            "quality_metrics": None,
+            "refinement_count": 0,
         }
 
         final_state = graph.invoke(state)
 
         print("\n=== FINAL OUTPUT ===")
         print(final_state["code"])
+
+        if final_state.get("quality_metrics"):
+            print("\n" + format_metrics_report(final_state["quality_metrics"]))
 
 
 if __name__ == "__main__":

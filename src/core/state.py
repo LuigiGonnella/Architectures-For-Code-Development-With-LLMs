@@ -13,3 +13,5 @@ class AgentState(TypedDict):
     code: Optional[str]
     review: Optional[str]
     exec_result: Optional[dict]
+    quality_metrics: Optional[dict]
+    refinement_count: Optional[int]
