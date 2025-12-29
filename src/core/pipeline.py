@@ -22,8 +22,8 @@ def analysis_node(state: AgentState) -> AgentState:
     )
     
     if state.get("show_node_info"):
-        print(f"  Analysis:\n  {state['analysis'].replace('\n', '\n  ')}\n")
-    
+        analysis_text = state['analysis'].replace('\n', '\n  ')
+        print(f"  Analysis:\n  {analysis_text}\n")
     return state
 
 
@@ -34,7 +34,8 @@ def planning_node(state: AgentState) -> AgentState:
         model=state["model"],
     )
     if state.get("show_node_info"):
-        print(f"  Plan:\n  {state['plan'].replace('\n', '\n  ')}\n")
+        plan_text = state['plan'].replace('\n', '\n  ')
+        print(f"  Plan:\n  {plan_text}\n")
     
     return state
 
@@ -49,7 +50,8 @@ def generation_node(state: AgentState) -> AgentState:
     state["code"] = extract_python_code(raw_code)
 
     if state.get("show_node_info"):
-        print(f"  Generated Code:\n  {state['code'].replace('\n', '\n  ')}\n")
+        code_text = state['code'].replace('\n', '\n  ')
+        print(f"  Generated Code:\n  {code_text}\n")
     
     return state
 
@@ -70,11 +72,13 @@ def review_node(state: AgentState) -> AgentState:
         quality_metrics=metrics,
     )
      
-    print("  " + format_metrics_report(metrics).replace("\n", "\n  "))
-    print(f"\n  Exec results: {exec_result}")
-    
     if state.get("show_node_info"):
-        print(f'  Reviewer result:\n    {state["review"].replace("\n", "\n    ")}\n')
+        metrics_report = format_metrics_report(metrics).replace("\n", "\n  ")
+        print("  " + metrics_report)
+        print(f"\n  Exec results: {exec_result}")
+        
+        review_text = state["review"].replace("\n", "\n    ")
+        print(f'  Reviewer result:\n    {review_text}\n')
     
     return state
 
