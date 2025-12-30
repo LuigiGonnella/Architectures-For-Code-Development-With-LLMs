@@ -61,7 +61,7 @@ def run_external_tests(task_id, generated_code, test_path):
     test_class_code = extract_test_class(test_path, test_class_name)
     if not test_class_code:
         print(f"  Can't extract class {test_class_name} from {test_path}")
-        return
+        return 0, 0
 
     # Extract imports from the test file to ensure dependencies are met
     with open(test_path, "r") as f:
@@ -91,22 +91,34 @@ def run_external_tests(task_id, generated_code, test_path):
     result = subprocess.run(cmd, capture_output=True, text=True)
     
     print("\nTest Results:")
+
     if result.returncode == 0:
         print("  All tests passed!")
     else:
         print("  Some tests failed.")
-        # Filter output to show only the summary
-        output_lines = result.stdout.splitlines()
-        summary_start_index = -1
-        for i, line in enumerate(output_lines):
-            if "short test summary info" in line:
-                summary_start_index = i
+        
+    # Filter output to show only the summary
+    output_lines = result.stdout.splitlines()
+    summary_start_index = -1
+    for i, line in enumerate(output_lines):
+        if "short test summary info" in line:
+            summary_start_index = i
+            break
+    
+    if summary_start_index != -1:
+        print("\n".join(output_lines[summary_start_index:]))
+    else:
+        # If no short summary, look for the final status line (e.g. "=== 88 passed in 0.03s ===")
+        summary_line = None
+        for line in reversed(output_lines):
+            if line.strip().startswith("=") and ("passed" in line or "failed" in line):
+                summary_line = line
                 break
         
-        if summary_start_index != -1:
-            print("\n".join(output_lines[summary_start_index:]))
-        else:
-            # Fallback if summary not found
+        if summary_line:
+            print(summary_line)
+        elif result.returncode != 0:
+            # Fallback if summary not found and tests failed
             print("\n".join(output_lines[-15:]))
 
     os.remove(temp_file_name)
