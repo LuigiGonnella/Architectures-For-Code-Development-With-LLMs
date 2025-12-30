@@ -1,44 +1,6 @@
 import pytest
 from typing import List, Optional
 
-# ============================================================================
-# HELPER CLASSES
-# ============================================================================
-
-
-class TreeNode:
-    """Definition for a binary tree node."""
-
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-
-
-def build_tree_from_list(values: List) -> Optional[TreeNode]:
-    """Build a binary tree from a level-order list representation."""
-    if not values or values[0] is None:
-        return None
-
-    root = TreeNode(values[0])
-    queue = [root]
-    i = 1
-
-    while queue and i < len(values):
-        node = queue.pop(0)
-
-        if i < len(values) and values[i] is not None:
-            node.left = TreeNode(values[i])
-            queue.append(node.left)
-        i += 1
-
-        if i < len(values) and values[i] is not None:
-            node.right = TreeNode(values[i])
-            queue.append(node.right)
-        i += 1
-
-    return root
-
 
 # ============================================================================
 # TEST FUNCTIONS - IS VALID
@@ -514,6 +476,12 @@ class TestFindMedianSortedArrays:
 # TEST FUNCTIONS - MAX PATH SUM
 # ============================================================================
 
+class TreeNode:
+        """Definition for a binary tree node."""
+        def __init__(self, val=0, left=None, right=None):
+            self.val = val
+            self.left = left
+            self.right = right
 
 def max_path_sum(root: Optional[TreeNode]) -> int:
     """Given the root of a binary tree, return the maximum path sum of any non-empty path."""
@@ -543,15 +511,7 @@ def max_path_sum(root: Optional[TreeNode]) -> int:
 
 class TestMaxPathSum:
     """Test cases for max_path_sum (Binary Tree Maximum Path Sum) function"""
-    class TreeNode:
-        """Definition for a binary tree node."""
-        def __init__(self, val=0, left=None, right=None):
-            self.val = val
-            self.left = left
-            self.right = right
-
-
-    def build_tree_from_list(values: List) -> Optional[TreeNode]:
+    def build_tree_from_list(self, values: List) -> Optional[TreeNode]:
         """Build a binary tree from a level-order list representation."""
         if not values or values[0] is None:
             return None
@@ -575,16 +535,15 @@ class TestMaxPathSum:
 
         return root
 
-
     # VALID TESTS
     def test_basic_cases(self):
         """Test basic cases from examples"""
         # [1,2,3] -> tree with 1 as root, 2 left, 3 right
-        root1 = build_tree_from_list([1, 2, 3])
+        root1 = self.build_tree_from_list([1, 2, 3])
         assert max_path_sum(root1) == 6
 
         # [-10,9,20,null,null,15,7]
-        root2 = build_tree_from_list([-10, 9, 20, None, None, 15, 7])
+        root2 = self.build_tree_from_list([-10, 9, 20, None, None, 15, 7])
         assert max_path_sum(root2) == 42
 
     def test_single_node(self):
@@ -597,17 +556,17 @@ class TestMaxPathSum:
 
     def test_all_positive(self):
         """Test with all positive values"""
-        root = build_tree_from_list([1, 2, 3, 4, 5, 6, 7])
+        root = self.build_tree_from_list([1, 2, 3, 4, 5, 6, 7])
         assert max_path_sum(root) == 18  # 4+2+1+3+7 or similar
 
     def test_all_negative(self):
         """Test with all negative values"""
-        root = build_tree_from_list([-1, -2, -3])
+        root = self.build_tree_from_list([-1, -2, -3])
         assert max_path_sum(root) == -1  # Just the root
 
     def test_mixed_values(self):
         """Test with mixed positive and negative"""
-        root = build_tree_from_list([2, -1, -2])
+        root = self.build_tree_from_list([2, -1, -2])
         assert max_path_sum(root) == 2
 
     def test_left_skewed_tree(self):
@@ -626,7 +585,7 @@ class TestMaxPathSum:
 
     def test_negative_root_positive_children(self):
         """Test with negative root but positive children"""
-        root = build_tree_from_list([-10, 9, 20])
+        root = self.build_tree_from_list([-10, 9, 20])
         assert max_path_sum(root) == 20  # Just 20, or 9 + (-10) + 20 = 19
 
     # BOUNDARY TESTS
@@ -644,17 +603,17 @@ class TestMaxPathSum:
 
     def test_large_values(self):
         """Test with large values"""
-        root = build_tree_from_list([1000, 1000, 1000])
+        root = self.build_tree_from_list([1000, 1000, 1000])
         assert max_path_sum(root) == 3000
 
     def test_zero_values(self):
         """Test with zero values"""
-        root = build_tree_from_list([0, 0, 0])
+        root = self.build_tree_from_list([0, 0, 0])
         assert max_path_sum(root) == 0
 
     def test_path_not_through_root(self):
         """Test when max path doesn't go through root"""
-        root = build_tree_from_list([-100, 50, 50, 25, 25, 25, 25])
+        root = self.build_tree_from_list([-100, 50, 50, 25, 25, 25, 25])
         # Max path is in one of the subtrees
         assert max_path_sum(root) > 0
 

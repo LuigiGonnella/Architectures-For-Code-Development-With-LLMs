@@ -1,7 +1,7 @@
 [
     {
-        "id": "fizzbuzz",
-        "signature": "def fizzbuzz(n: int) -> list:",
+        "id": "fizz_buzz",
+        "signature": "def fizz_buzz(n: int) -> list:",
         "docstring": "Return a list of strings from 1 to n where: multiples of 3 are 'Fizz', multiples of 5 are 'Buzz', multiples of both are 'FizzBuzz', and other numbers are their string representation.",
         "examples": [
             {
@@ -16,7 +16,7 @@
         "difficulty": "Easy"
     },
     {
-        "id": "sudoku_validator",
+        "id": "is_valid_sudoku",
         "signature": "def is_valid_sudoku(board: list[list[str]]) -> bool:",
         "docstring": "Determine if a 9x9 Sudoku board is valid. Only filled cells (1-9) need to be validated. Empty cells are represented by '.'. Each row, column, and 3x3 sub-box must contain digits 1-9 without repetition.",
         "examples": [
@@ -52,7 +52,7 @@
         "difficulty": "Medium"
     },
     {
-        "id": "n_queens",
+        "id": "solve_n_queens",
         "signature": "def solve_n_queens(n: int) -> list[list[str]]:",
         "docstring": "Solve the N-Queens puzzle: place n queens on an n×n chessboard so no two queens attack each other. Return all distinct solutions where each solution contains board configurations with 'Q' for queen and '.' for empty space.",
         "examples": [
@@ -68,7 +68,7 @@
         "difficulty": "Hard"
     },
     {
-        "id": "expression_evaluator",
+        "id": "evaluate_expression",
         "signature": "def evaluate_expression(expression: str) -> bool:",
         "docstring": "Given a string expression with parentheses, AND ('&'), OR ('|'), and NOT ('!') operators, and boolean values ('t' for true, 'f' for false), evaluate the expression and return the result. Parentheses indicate evaluation order.",
         "examples": [
