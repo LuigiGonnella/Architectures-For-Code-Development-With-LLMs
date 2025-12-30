@@ -543,6 +543,38 @@ def max_path_sum(root: Optional[TreeNode]) -> int:
 
 class TestMaxPathSum:
     """Test cases for max_path_sum (Binary Tree Maximum Path Sum) function"""
+    class TreeNode:
+        """Definition for a binary tree node."""
+        def __init__(self, val=0, left=None, right=None):
+            self.val = val
+            self.left = left
+            self.right = right
+
+
+    def build_tree_from_list(values: List) -> Optional[TreeNode]:
+        """Build a binary tree from a level-order list representation."""
+        if not values or values[0] is None:
+            return None
+
+        root = TreeNode(values[0])
+        queue = [root]
+        i = 1
+
+        while queue and i < len(values):
+            node = queue.pop(0)
+
+            if i < len(values) and values[i] is not None:
+                node.left = TreeNode(values[i])
+                queue.append(node.left)
+            i += 1
+
+            if i < len(values) and values[i] is not None:
+                node.right = TreeNode(values[i])
+                queue.append(node.right)
+            i += 1
+
+        return root
+
 
     # VALID TESTS
     def test_basic_cases(self):

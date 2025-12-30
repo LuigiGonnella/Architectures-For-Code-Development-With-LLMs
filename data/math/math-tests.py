@@ -133,24 +133,17 @@ class TestModp:
 
 
 def largest_prime_factor(n: int) -> int:
-    if not isinstance(n, int):
-        raise TypeError("n must be an integer")
-    if n <= 1:
-        raise ValueError("n must be greater than 1")
-
-    def is_prime(k: int) -> bool:
-        if k < 2:
-            return False
-        for i in range(2, int(math.sqrt(k)) + 1):
-            if k % i == 0:
-                return False
-        return True
-
-    largest = 1
-    for j in range(2, n + 1):
-        if n % j == 0 and is_prime(j):
-            largest = j
-    return largest
+      largest_prime = 0
+      factor = 2
+      
+      while n > 1:
+          if n % factor == 0:
+              largest_prime = factor
+              while n % factor == 0:
+                  n //= factor
+          factor += 1
+      
+      return largest_prime
 
 
 class TestLargestPrimeFactor:

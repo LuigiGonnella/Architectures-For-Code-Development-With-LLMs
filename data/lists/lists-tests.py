@@ -340,7 +340,7 @@ class TestTriplesSumToZero:
 # ============================================================================
 
 
-def minPath(grid: List[List[int]], k: int) -> List[int]:
+def min_path(grid: List[List[int]], k: int) -> List[int]:
     """
     Given a grid with N rows and N columns (N >= 2) and a positive integer k, each cell of the grid contains a value.
     Every integer in the range [1, N * N] inclusive appears exactly once on the cells of the grid.
@@ -413,23 +413,23 @@ class TestMinPath:
 
     # VALID TESTS
     def test_case_1(self):
-        assert minPath([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 3) == [1, 2, 1]
+        assert min_path([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 3) == [1, 2, 1]
 
     def test_case_2(self):
-        assert minPath([[5, 9, 3], [4, 1, 6], [7, 8, 2]], 1) == [1]
+        assert min_path([[5, 9, 3], [4, 1, 6], [7, 8, 2]], 1) == [1]
 
     def test_case_3(self):
-        assert minPath(
+        assert min_path(
             [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]], 4
         ) == [1, 2, 1, 2]
 
     def test_case_4(self):
-        assert minPath(
+        assert min_path(
             [[8, 14, 9, 2], [6, 4, 13, 15], [5, 7, 1, 12], [3, 10, 11, 16]], 5
         ) == [1, 7, 1, 7, 1]
 
     def test_case_5(self):
-        assert minPath([[2, 7, 4], [3, 1, 5], [6, 8, 9]], 8) == [
+        assert min_path([[2, 7, 4], [3, 1, 5], [6, 8, 9]], 8) == [
             1,
             3,
             1,
@@ -442,40 +442,40 @@ class TestMinPath:
 
     # BOUNDARY TESTS
     def test_case_6(self):
-        assert minPath([[1, 2], [3, 4]], 10) == [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
+        assert min_path([[1, 2], [3, 4]], 10) == [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
 
     def test_case_7(self):
-        assert minPath([[1, 3], [4, 2]], 10) == [1, 3, 1, 3, 1, 3, 1, 3, 1, 3]
+        assert min_path([[1, 3], [4, 2]], 10) == [1, 3, 1, 3, 1, 3, 1, 3, 1, 3]
 
     # INVALID INPUT TESTS
     def test_case_8(self):
         with pytest.raises(TypeError):
-            minPath("not a list", 3)
+            min_path("not a list", 3)
 
     def test_case_9(self):
         with pytest.raises(ValueError):
-            minPath([[1]], 3)
+            min_path([[1]], 3)
 
     def test_case_10(self):
         with pytest.raises(ValueError):
-            minPath([[1, 2], [3]], 3)
+            min_path([[1, 2], [3]], 3)
 
     def test_case_11(self):
         with pytest.raises(ValueError):
-            minPath([[1, 2], [2, 4]], 3)
+            min_path([[1, 2], [2, 4]], 3)
 
     def test_case_12(self):
         with pytest.raises(ValueError):
-            minPath([[1, 2], [3, "4"]], 3)
+            min_path([[1, 2], [3, "4"]], 3)
 
     def test_case_13(self):
         with pytest.raises(ValueError):
-            minPath([[1, 2], [3, 4]], 0)
+            min_path([[1, 2], [3, 4]], 0)
 
     def test_case_14(self):
         with pytest.raises(ValueError):
-            minPath([[1, 2], [3, 4]], -5)
+            min_path([[1, 2], [3, 4]], -5)
 
     def test_case_15(self):
         with pytest.raises(ValueError):
-            minPath([[1, 2], [3, 5]], 3)
+            min_path([[1, 2], [3, 5]], 3)

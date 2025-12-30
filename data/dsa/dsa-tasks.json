@@ -1,6 +1,6 @@
 [
     {
-        "id": "valid_parentheses",
+        "id": "is_valid",
         "signature": "def is_valid(s: str) -> bool:",
         "docstring": "Check if the input string of parentheses is valid.",
         "examples": [
@@ -16,7 +16,7 @@
         "difficulty": "Easy"
     },
     {
-        "id": "Unique Binary Search Trees",
+        "id": "num_trees",
         "signature": "def num_trees(n: int) -> int:",
         "docstring": "Given an integer n, return the number of structurally unique BST's (binary search trees) which has exactly n nodes of unique values from 1 to n.",
         "examples": [
@@ -32,8 +32,8 @@
         "difficulty": "Medium"
     },
     {
-        "id": "Longest Increasing Subsequence",
-        "signature": "def length_of_lis(nums: List[int], numsize: int) -> int:",
+        "id": "length_of_lis",
+        "signature": "def length_of_lis(nums: List[int]) -> int:",
         "docstring": "Given an integer array nums, return the length of the longest strictly increasing subsequence.",
         "examples": [
             {
@@ -48,7 +48,7 @@
         "difficulty": "Medium"
     },
     {
-        "id": "Median of Two Sorted Arrays",
+        "id": "find_median_sorted_arrays",
         "signature": "def find_median_sorted_arrays(nums1: List[int], nums2: List[int]) -> float:",
         "docstring": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays. The overall run time complexity should be O(log (m+n)).",
         "examples": [
@@ -64,7 +64,7 @@
         "difficulty": "Hard"
     },
     {
-        "id": "Binary Tree Maximum Path Sum",
+        "id": "max_path_sum",
         "signature": "def max_path_sum(root: Optional[TreeNode]) -> int:",
         "docstring": "A path in a binary tree is a sequence of nodes where each pair of adjacent nodes in the sequence has an edge connecting them. A node can only appear in the sequence at most once. Note that the path does not need to pass through the root. The path sum of a path is the sum of the node's values in the path. Given the root of a binary tree, return the maximum path sum of any non-empty path.",
         "examples": [
