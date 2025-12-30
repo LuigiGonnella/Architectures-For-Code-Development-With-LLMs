@@ -91,7 +91,7 @@ def main():
         if args.test_file and final_state.get("code"):
             run_external_tests(task["id"], final_state["code"], args.test_file)
 
-        print("\n" + "-"*50 + "\n") 
+        print("\n" + "-"*100 + "\n") 
 
 
 if __name__ == "__main__":

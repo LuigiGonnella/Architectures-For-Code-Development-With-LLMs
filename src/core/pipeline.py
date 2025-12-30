@@ -22,8 +22,8 @@ def analysis_node(state: AgentState) -> AgentState:
     )
     
     if state.get("show_node_info"):
-        analysis_text = state['analysis'].replace('\n', '\n  ')
-        print(f"  Analysis:\n  {analysis_text}\n")
+        analysis_text = state['analysis'].replace('\n', '\n    ')
+        print(f"  Analysis:\n    {analysis_text}\n")
     return state
 
 
@@ -34,8 +34,8 @@ def planning_node(state: AgentState) -> AgentState:
         model=state["model"],
     )
     if state.get("show_node_info"):
-        plan_text = state['plan'].replace('\n', '\n  ')
-        print(f"  Plan:\n  {plan_text}\n")
+        plan_text = state['plan'].replace('\n', '\n    ')
+        print(f"  Plan:\n    {plan_text}\n")
     
     return state
 
@@ -50,8 +50,8 @@ def generation_node(state: AgentState) -> AgentState:
     state["code"] = extract_python_code(raw_code)
 
     if state.get("show_node_info"):
-        code_text = state['code'].replace('\n', '\n  ')
-        print(f"  Generated Code:\n  {code_text}\n")
+        code_text = state['code'].replace('\n', '\n    ')
+        print(f"  Generated Code:\n    {code_text}\n")
     
     return state
 
@@ -75,7 +75,7 @@ def review_node(state: AgentState) -> AgentState:
     if state.get("show_node_info"):
         metrics_report = format_metrics_report(metrics).replace("\n", "\n  ")
         print("  " + metrics_report)
-        print(f"\n  Exec results: {exec_result}")
+        print(f"\n  Exec results:\n    {exec_result}\n")
         
         review_text = state["review"].replace("\n", "\n    ")
         print(f'  Reviewer result:\n    {review_text}\n')
@@ -131,7 +131,7 @@ def refinement_node(state: AgentState) -> AgentState:
             print("  Refinement successful: code is correct.\n")
             return state
         else:
-            print("  Refinement incomplete: issues remain.")
+            print("  Refinement incomplete: issues remain.\n")
     
     print("  Maximum refinements reached. Ending refinement.\n")
 

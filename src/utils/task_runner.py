@@ -55,7 +55,7 @@ def run_external_tests(task_id, generated_code, test_path):
     camel_case_name = "".join(word.capitalize() for word in task_id.split("_"))
     test_class_name = f"Test{camel_case_name}"
 
-    print(f"  Running external tests ({test_class_name}) from {test_path}...")
+    print(f"Running external tests ({test_class_name}) from {test_path}...")
 
     # Estrai il codice della classe di test
     test_class_code = extract_test_class(test_path, test_class_name)
@@ -90,12 +90,23 @@ def run_external_tests(task_id, generated_code, test_path):
     
     result = subprocess.run(cmd, capture_output=True, text=True)
     
-    print("\n  Test Results:")
+    print("\nTest Results:")
     if result.returncode == 0:
         print("  All tests passed!")
     else:
         print("  Some tests failed.")
-        # Stampa un riassunto (ultime 15 righe)
-        print("\n".join(result.stdout.splitlines()[-15:]))
+        # Filter output to show only the summary
+        output_lines = result.stdout.splitlines()
+        summary_start_index = -1
+        for i, line in enumerate(output_lines):
+            if "short test summary info" in line:
+                summary_start_index = i
+                break
+        
+        if summary_start_index != -1:
+            print("\n".join(output_lines[summary_start_index:]))
+        else:
+            # Fallback if summary not found
+            print("\n".join(output_lines[-15:]))
 
     os.remove(temp_file_name)
