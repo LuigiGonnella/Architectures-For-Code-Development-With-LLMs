@@ -97,7 +97,7 @@ def refinement_node(state: AgentState) -> AgentState:
     while refinement_count < max_refinements:
         refinement_count += 1
         state["refinement_count"] = refinement_count
-        print(f"  Refinement: {refinement_count}/{max_refinements}\n")
+        print(f"  Refinement: {refinement_count}/{max_refinements}")
 
         raw_code = refine_code(
             code=state["code"],
