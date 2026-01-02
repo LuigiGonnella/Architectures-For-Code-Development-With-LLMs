@@ -1,7 +1,7 @@
 import pytest
 from dataclasses import FrozenInstanceError
 
-from src.utils.config import Config, config
+from single_agent.src.utils.config import Config, config
 
 
 def test_config_default_values():

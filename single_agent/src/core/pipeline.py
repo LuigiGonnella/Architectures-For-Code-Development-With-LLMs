@@ -1,9 +1,9 @@
 from langgraph.graph import StateGraph, START, END
-from src.core.state import AgentState
-from src.tools.executor import execute_code
-from src.utils.code_parser import extract_python_code
-from src.evaluation.quality import compute_quality_metrics, format_metrics_report
-from src.core.agent import (
+from single_agent.src.core.state import AgentState
+from single_agent.src.tools.executor import execute_code
+from single_agent.src.utils.code_parser import extract_python_code
+from single_agent.src.evaluation.quality import compute_quality_metrics, format_metrics_report
+from single_agent.src.core.agent import (
     analyze_task,
     preprocessing_task,
     plan_solution,
@@ -11,7 +11,7 @@ from src.core.agent import (
     review_code,
     refine_code,
 )
-from src.utils.config import config
+from single_agent.src.utils.config import config
 
 def preprocessing_node(query: str) -> AgentState:
     print("\n>> PREPROCESSING NODE")

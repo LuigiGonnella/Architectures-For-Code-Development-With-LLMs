@@ -10,7 +10,7 @@ Low-level LLM runtime for the project.
 import ollama
 import time
 from typing import Optional
-from src.utils.config import config
+from single_agent.src.utils.config import config
 
 DEFAULT_SYSTEM_PROMPT = """
 You are a single autonomous coding agent.

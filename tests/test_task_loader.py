@@ -3,7 +3,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from src.utils.task_loader import load_tasks
+from single_agent.src.utils.task_loader import load_tasks
 
 
 def test_load_valid_tasks():
