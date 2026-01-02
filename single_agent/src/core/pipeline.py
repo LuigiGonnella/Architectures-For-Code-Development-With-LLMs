@@ -27,7 +27,7 @@ def preprocessing_node(query: dict) -> AgentState:
         preprocessing_text['docstring'] = state.get('docstring')
         preprocessing_text['examples'] = state.get('examples')
         preprocessing_text['model'] = state.get('model')
-        preprocessing_text['show_nodes_info'] = state.get('show_nodes_info')
+        preprocessing_text['show_node_info'] = state.get('show_node_info')
 
         print(f"  Processed input:\n    {preprocessing_text}\n")
     return state

@@ -24,7 +24,7 @@ def preprocessing_task(query: str, model: str) -> AgentState:
         - signature: a valid Python function signature with type hints.
         - docstring: a concise explanation of the function’s purpose and behavior.
         - examples: a JSON list of input/output pairs demonstrating expected behavior.
-        - show_nodes_info: a boolean to keep as it is if already provided, to set at true if not provided.
+        - show_node_info: a boolean to keep as it is if already provided, to set at true if not provided.
 
         REQUIREMENTS:
 
@@ -44,7 +44,7 @@ def preprocessing_task(query: str, model: str) -> AgentState:
                     "output": "**SECOND_OUTPUT**"
                 }
             ],
-            "show_nodes_info": true
+            "show_node_info": true
         }
 
         2. The task_id should be concise, descriptive, and snake_case.
@@ -75,13 +75,13 @@ def preprocessing_task(query: str, model: str) -> AgentState:
                     "output": "3"
                 }
             ],
-            "show_nodes_info": true
+            "show_node_info": true
         }
 
         INSTRUCTIONS:
 
         - Always return valid JSON.
-        - Only fill the five fields: task_id, signature, docstring, examples, show_nodes_info.
+        - Only fill the five fields: task_id, signature, docstring, examples, show_node_info.
         - Do not include additional commentary, formatting, or markdown.
 
     """)
