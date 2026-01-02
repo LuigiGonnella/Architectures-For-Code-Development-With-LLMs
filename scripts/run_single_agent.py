@@ -40,42 +40,62 @@ def main():
         type=str,
         help="Path to the file containing external tests (e.g., data/strings/string_tests.py)",
     )
+    parser.add_argument(
+        "--query",
+        type=str,
+        help="query to ask to the agent",
+    )
     args = parser.parse_args()
 
     graph = build_single_agent_graph()
     tasks = load_tasks(args.task_file)
 
-    if args.task_id:
+    if args.task_id or args.task_file:
         tasks = [t for t in tasks if str(t.get("id")) == args.task_id]
         if not tasks:
             print(f"No task found with ID: {args.task_id}")
             return
 
-    for task in tasks:
-        print("QUERY:")
-        print(f"  ID        : {task.get('id')}")
-        print(f"  Signature : {task.get('signature')}")
-        print(f"  Docstring : {task.get('docstring')}")
-        if task.get("examples"):
-            print("  Examples  :")
-            for ex in task["examples"]:
-                print(f"    - Input : {ex.get('input')}")
-                print(f"      Output: {ex.get('output')}")
-        if task.get("difficulty"):
-            print(f"  Difficulty: {task.get('difficulty')}\n")
+        for task in tasks:
+            print("QUERY:")
+            print(f"  ID        : {task.get('id')}")
+            print(f"  Signature : {task.get('signature')}")
+            print(f"  Docstring : {task.get('docstring')}")
+            if task.get("examples"):
+                print("  Examples  :")
+                for ex in task["examples"]:
+                    print(f"    - Input : {ex.get('input')}")
+                    print(f"      Output: {ex.get('output')}")
+            if task.get("difficulty"):
+                print(f"  Difficulty: {task.get('difficulty')}\n")
 
-        query_dict = {
-            "task_id": task["id"],
-            "signature": task["signature"],
-            "docstring": task["docstring"],
-            "examples": task.get("examples"),
-            "difficulty": task.get("difficulty"),
-            "show_node_info": args.show_node_info,
-        }
-        query = json.dumps(query_dict, ensure_ascii=False, indent=2)
-        state = {'query': query} #generalize to always process a string (preprocessing_node will unwrap the string)
+            query_dict = {
+                "task_id": task["id"],
+                "signature": task["signature"],
+                "docstring": task["docstring"],
+                "examples": task.get("examples"),
+                "difficulty": task.get("difficulty"),
+                "show_node_info": args.show_node_info,
+            }
+            query = json.dumps(query_dict, ensure_ascii=False, indent=2)
+            state = {'query': query} #generalize to always process a string (preprocessing_node will unwrap the string)
 
+            final_state = graph.invoke(state)
 
+            print("\n=== RESULT ===")
+            indented_code = final_state['code'].replace('\n', '\n  ')
+            print(f"Final code:\n  {indented_code}")
+
+            if final_state.get("quality_metrics"):
+                print("\n" + format_metrics_report(final_state["quality_metrics"]) + "\n")
+
+            if args.test_file and final_state.get("code"):
+                run_external_tests(task["id"], final_state["code"], args.test_file)
+
+            print("\n" + "-"*100 + "\n") 
+
+    elif args.query:
+        state = {'query': args.query} #generalize to always process a string (preprocessing_node will unwrap the string)
         final_state = graph.invoke(state)
 
         print("\n=== RESULT ===")
@@ -89,6 +109,11 @@ def main():
             run_external_tests(task["id"], final_state["code"], args.test_file)
 
         print("\n" + "-"*100 + "\n") 
+
+    else:
+        print("You must enter a query or a task path")
+        return 0
+
 
 
 if __name__ == "__main__":
