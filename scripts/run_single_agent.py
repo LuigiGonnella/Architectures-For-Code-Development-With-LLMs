@@ -50,7 +50,7 @@ def main():
     graph = build_single_agent_graph()
     tasks = load_tasks(args.task_file)
 
-    if args.task_id or args.task_file:
+    if args.task_id:
         tasks = [t for t in tasks if str(t.get("id")) == args.task_id]
         if not tasks:
             print(f"No task found with ID: {args.task_id}")
