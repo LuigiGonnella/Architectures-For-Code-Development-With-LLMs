@@ -8,11 +8,11 @@ _PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
-from src.core.pipeline import build_single_agent_graph
-from src.utils.task_loader import load_tasks
-from src.utils.config import config
-from src.evaluation.quality import format_metrics_report
-from src.utils.test_runner import run_external_tests
+from single_agent.src.core.pipeline import build_single_agent_graph
+from single_agent.src.utils.task_loader import load_tasks
+from single_agent.src.utils.config import config
+from single_agent.src.evaluation.quality import format_metrics_report
+from single_agent.src.utils.test_runner import run_external_tests
 import json
 
 
