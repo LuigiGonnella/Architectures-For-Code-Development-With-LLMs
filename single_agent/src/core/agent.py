@@ -24,7 +24,7 @@ def preprocessing_task(query: str, model: str) -> AgentState:
         - signature: a valid Python function signature with type hints.
         - docstring: a concise explanation of the function’s purpose and behavior.
         - examples: a JSON list of input/output pairs demonstrating expected behavior.
-        - show_nodes_info: a boolean to keep as it is if already provided, to set at True if not provided.
+        - show_nodes_info: a boolean to keep as it is if already provided, to set at true if not provided.
 
         REQUIREMENTS:
 
@@ -44,7 +44,7 @@ def preprocessing_task(query: str, model: str) -> AgentState:
                     "output": "**SECOND_OUTPUT**"
                 }
             ],
-            "show_nodes_info": True
+            "show_nodes_info": true
         }
 
         2. The task_id should be concise, descriptive, and snake_case.
@@ -75,7 +75,7 @@ def preprocessing_task(query: str, model: str) -> AgentState:
                     "output": "3"
                 }
             ],
-            "show_nodes_info": True
+            "show_nodes_info": true
         }
 
         INSTRUCTIONS:
@@ -89,6 +89,10 @@ def preprocessing_task(query: str, model: str) -> AgentState:
     result = call_llm(user_prompt=prompt, model=model)
     print(result)
     json_str = extract_json(result)
+    
+    
+    
+    print(f"DEBUG: Extracted JSON string:\n{json_str}\n")
     task_dict = json.loads(json_str)
     state["task_id"] = task_dict["task_id"]
     state["signature"] = task_dict["signature"]

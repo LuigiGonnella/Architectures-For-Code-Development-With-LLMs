@@ -8,6 +8,9 @@ def extract_json(text: str) -> str:
     """
     Extract JSON from LLM response that may contain markdown or extra text.
     """
+    # Fix Python booleans to JSON booleans
+    json_match = text.replace('True', 'true').replace('False', 'false').replace('None', 'null')
+
     # Try to find JSON between markdown code blocks (```json or ```)
     json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text, re.DOTALL)
     if json_match:
