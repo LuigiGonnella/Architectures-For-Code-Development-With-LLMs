@@ -3,6 +3,7 @@ from typing import Optional
 
 
 class AgentState(TypedDict):
+    query: Optional[str]
     task_id: str
     signature: str
     docstring: str
