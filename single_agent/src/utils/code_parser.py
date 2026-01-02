@@ -1,6 +1,25 @@
 import re
 from typing import Optional
 import ast
+import json
+
+
+def extract_json(text: str) -> str:
+    """
+    Extract JSON from LLM response that may contain markdown or extra text.
+    """
+    # Try to find JSON between markdown code blocks
+    json_match = re.search(r'```(?:json)?\s*({.*?})\s*```', text, re.DOTALL)
+    if json_match:
+        return json_match.group(1)
+    
+    # Try to find raw JSON object
+    json_match = re.search(r'{.*}', text, re.DOTALL)
+    if json_match:
+        return json_match.group(0)
+    
+    # Return as-is if no match (will likely fail JSON parsing)
+    return text.strip()
 
 
 def _is_valid_python(code: str) -> bool:

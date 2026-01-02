@@ -9,6 +9,7 @@ from single_agent.src.core.llm import call_llm
 from single_agent.src.core.state import AgentState
 import json
 from single_agent.src.utils.config import config
+from single_agent.src.utils.code_parser import extract_json
 
 
 def preprocessing_task(query: str, model: str) -> AgentState:
@@ -86,7 +87,9 @@ def preprocessing_task(query: str, model: str) -> AgentState:
     """)
 
     result = call_llm(user_prompt=prompt, model=model)
-    task_dict = json.loads(result)
+    print(result)
+    json_str = extract_json(result)
+    task_dict = json.loads(json_str)
     state["task_id"] = task_dict["task_id"]
     state["signature"] = task_dict["signature"]
     state["docstring"] = task_dict["docstring"]
