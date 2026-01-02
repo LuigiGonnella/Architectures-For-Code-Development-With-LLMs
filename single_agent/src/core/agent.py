@@ -90,9 +90,6 @@ def preprocessing_task(query: str, model: str) -> AgentState:
     print(result)
     json_str = extract_json(result)
     
-    
-    
-    print(f"DEBUG: Extracted JSON string:\n{json_str}\n")
     task_dict = json.loads(json_str)
     state["task_id"] = task_dict["task_id"]
     state["signature"] = task_dict["signature"]
