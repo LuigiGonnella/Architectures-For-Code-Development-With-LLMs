@@ -39,6 +39,12 @@ def main():
         type=str,
         help="Path to the file containing external tests (e.g., data/strings/string_tests.py)",
     )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default=config.model_name,
+        help="LLM model to use (default: %(default)s)",
+    )
     args = parser.parse_args()
 
     graph = build_single_agent_graph()
@@ -69,7 +75,7 @@ def main():
             "docstring": task["docstring"],
             "examples": task.get("examples"),
             "difficulty": task.get("difficulty"),
-            "model": config.model_name,
+            "model": args.model,
             "analysis": None,
             "plan": None,
             "code": None,
@@ -83,7 +89,8 @@ def main():
         final_state = graph.invoke(state)
 
         print("\n=== RESULT ===")
-        print(f"Final code:\n  { final_state['code'].replace('\n', '\n  ') }")
+        code_indented = final_state['code'].replace('\n', '\n  ')
+        print(f"Final code:\n  {code_indented}")
 
         if final_state.get("quality_metrics"):
             print("\n" + format_metrics_report(final_state["quality_metrics"]) + "\n")
@@ -112,4 +119,8 @@ if __name__ == "__main__":
 # python -m scripts.run_single_agent --task-file data/strings/strings-tasks.json --show-node-info
 
 # Usage with external test file
-# python -m scripts.run_single_agent --task-file data/strings/strings-tasks.json --task-id count_vowels --test-file data/strings/string_tests.py
+# python -m scripts.run_single_agent --task-file data/strings/strings-tasks.json --task-id count_vowels --test-file data/strings/strings-tests.py
+
+# Usage with different models
+# python -m scripts.run_single_agent --model deepseek-coder-v2:16b --task-file data/strings/strings-tasks.json
+# python -m scripts.run_single_agent --model codellama:7b-instruct --task-file data/strings/strings-tasks.json

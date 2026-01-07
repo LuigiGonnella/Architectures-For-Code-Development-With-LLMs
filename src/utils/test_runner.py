@@ -124,3 +124,58 @@ def run_external_tests(task_id, generated_code, test_path):
             print("\n".join(output_lines[-15:]))
 
     os.remove(temp_file_name)
+
+
+def run_tests_silent(task_id, generated_code, test_path):
+    """
+    Run tests silently and return (passed, failed, error_msg).
+    Returns (0, 0, error_msg) if tests cannot be run.
+    """
+    import re
+
+    if not os.path.exists(test_path):
+        return 0, 0, "Test file not found"
+
+    camel_case_name = "".join(word.capitalize() for word in task_id.split("_"))
+    test_class_name = f"Test{camel_case_name}"
+
+    test_class_code = extract_test_class(test_path, test_class_name)
+    if not test_class_code:
+        return 0, 0, f"Test class {test_class_name} not found"
+
+    with open(test_path, "r") as f:
+        test_file_content = f.read()
+    extra_imports = extract_imports(test_file_content)
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".py", delete=False
+    ) as temp_test_file:
+        temp_file_name = temp_test_file.name
+        temp_test_file.write("import pytest\n")
+        temp_test_file.write("import typing\n")
+        temp_test_file.write("from typing import List, Dict, Set, Optional, Any\n")
+        temp_test_file.write(extra_imports + "\n\n")
+        temp_test_file.write(generated_code + "\n\n")
+        temp_test_file.write(test_class_code)
+
+    try:
+        cmd = [sys.executable, "-m", "pytest", temp_file_name, "-v", "--tb=no"]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        output = result.stdout + result.stderr
+
+        passed = 0
+        failed = 0
+        if match := re.search(r"(\d+) passed", output):
+            passed = int(match.group(1))
+        if match := re.search(r"(\d+) failed", output):
+            failed = int(match.group(1))
+
+        error_msg = "" if result.returncode == 0 else "Some tests failed"
+        return passed, failed, error_msg
+
+    except subprocess.TimeoutExpired:
+        return 0, 0, "Test timeout"
+    except Exception as e:
+        return 0, 0, str(e)
+    finally:
+        os.remove(temp_file_name)
