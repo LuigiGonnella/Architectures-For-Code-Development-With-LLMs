@@ -47,7 +47,10 @@ def generation_node(state: AgentState) -> AgentState:
         plan=state["plan"],
         model=state["model"],
     )
-    state["code"] = extract_python_code(raw_code)
+    extracted = extract_python_code(raw_code)
+    if extracted is None:
+        raise ValueError("Failed to extract valid Python code from generation output")
+    state["code"] = extracted
 
     if state.get("show_node_info"):
         code_text = state["code"].replace("\n", "\n    ")
@@ -83,10 +86,10 @@ def review_node(state: AgentState) -> AgentState:
     return state
 
 
-def refine_step(code: str, review: str, model: str) -> str:
+def refine_step(code: str, review: str, model: str) -> str | None:
     """
     Single refinement step: call LLM to refine code based on review.
-    Returns extracted Python code.
+    Returns extracted Python code, or None if extraction fails.
     """
     raw_code = refine_code(
         code=code,
@@ -146,6 +149,13 @@ def refinement_node(state: AgentState) -> AgentState:
             review=state["review"],
             model=state["model"],
         )
+
+        # If extraction failed, skip this refinement iteration but keep trying
+        if refined_code is None:
+            print("  Refinement extraction failed. Keeping original code.\n")
+            refinement_count += 1
+            state["refinement_count"] = refinement_count
+            continue
 
         # Step 2: Evaluate the refined code (no metrics yet)
         exec_result, review = evaluate_refined_code(

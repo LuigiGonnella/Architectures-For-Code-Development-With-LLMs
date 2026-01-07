@@ -6,3 +6,4 @@ ollama
 black
 ruff
 pytest
+tqdm

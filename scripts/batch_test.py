@@ -12,6 +12,8 @@ import argparse
 import csv
 from datetime import datetime
 
+from tqdm import tqdm
+
 from src.core.pipeline import build_single_agent_graph
 from src.utils.task_loader import load_tasks
 from src.utils.test_runner import run_tests_silent
@@ -68,23 +70,45 @@ def run_task(graph, model, task, test_path):
 
 
 def print_results_table(model, results):
-    """Print results in a formatted table."""
+    """Print results in a formatted table, grouped by domain."""
     print(f"\n{'='*80}")
     print(f"RESULTS: {model}")
     print(f"{'='*80}\n")
-    print(f"{'Task ID':<45} {'Passed':>8} {'Failed':>8} {'Pass Rate':>10}")
-    print("-" * 80)
+
+    # Group results by domain
+    domains = {}
+    for r in results:
+        domain = r.get("domain", "unknown")
+        if domain not in domains:
+            domains[domain] = []
+        domains[domain].append(r)
 
     total_passed = total_failed = 0
-    for r in results:
-        task_label = f"{r['task_id']} ({r['difficulty'].lower()})"
-        total = r["passed"] + r["failed"]
-        rate = (r["passed"] / total * 100) if total > 0 else 0
-        total_passed += r["passed"]
-        total_failed += r["failed"]
-        print(f"{task_label:<45} {r['passed']:>8} {r['failed']:>8} {rate:>9.2f}%")
 
-    print("-" * 80)
+    for domain, domain_results in domains.items():
+        print(f"[{domain.upper()}]")
+        print(f"{'Task ID':<45} {'Passed':>8} {'Failed':>8} {'Pass Rate':>10}")
+        print("-" * 80)
+
+        domain_passed = domain_failed = 0
+        for r in domain_results:
+            task_label = f"{r['task_id']} ({r['difficulty'].lower()})"
+            task_total = r["passed"] + r["failed"]
+            rate = (r["passed"] / task_total * 100) if task_total > 0 else 0
+            domain_passed += r["passed"]
+            domain_failed += r["failed"]
+            print(f"{task_label:<45} {r['passed']:>8} {r['failed']:>8} {rate:>9.2f}%")
+
+        domain_total = domain_passed + domain_failed
+        domain_rate = (domain_passed / domain_total * 100) if domain_total > 0 else 0
+        print("-" * 80)
+        print(f"{'Subtotal':<45} {domain_passed:>8} {domain_failed:>8} {domain_rate:>9.2f}%")
+        print()
+
+        total_passed += domain_passed
+        total_failed += domain_failed
+
+    print("=" * 80)
     total = total_passed + total_failed
     rate = (total_passed / total * 100) if total > 0 else 0
     print(f"{'TOTAL':<45} {total_passed:>8} {total_failed:>8} {rate:>9.2f}%\n")
@@ -122,8 +146,9 @@ def main():
 
             print(f"\n[{model}] {domain}: {len(tasks)} tasks")
 
-            for task in tasks:
-                print(f"  Running {task['id']}...", end=" ", flush=True)
+            pbar = tqdm(tasks, desc="Tasks", unit="task", leave=True)
+            for task in pbar:
+                pbar.set_description(f"{task['id']}")
                 result = run_task(graph, model, task, tests_file)
                 result["model"] = model
                 result["domain"] = domain
@@ -133,7 +158,7 @@ def main():
                 status = (
                     "PASS" if result["failed"] == 0 and result["passed"] > 0 else "FAIL"
                 )
-                print(
+                pbar.set_postfix_str(
                     f"{status} ({result['passed']}/{result['passed']+result['failed']})"
                 )
 
