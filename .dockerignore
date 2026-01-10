@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.git/
+.vscode/
+node_modules/
+.next/
+single_agent_webapp/frontend/.next/
+single_agent_webapp/frontend/node_modules/
+*.log

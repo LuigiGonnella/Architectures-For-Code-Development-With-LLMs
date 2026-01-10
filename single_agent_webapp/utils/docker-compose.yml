@@ -1,0 +1,36 @@
+name: llm-for-se
+
+services:
+  backend:
+    container_name: llm-for-se-backend
+    build:
+      context: ../..
+      dockerfile: single_agent_webapp/backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MODEL_NAME=${MODEL_NAME:-qwen2.5-coder:7b-instruct}
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ../..:/app
+    restart: unless-stopped
+
+  frontend:
+    container_name: llm-for-se-frontend
+    build:
+      context: ../..
+      dockerfile: single_agent_webapp/frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  default:
+    name: llm-se-network

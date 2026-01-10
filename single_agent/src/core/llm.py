@@ -9,6 +9,7 @@ Low-level LLM runtime for the project.
 
 import ollama
 import time
+import os
 from typing import Optional
 from single_agent.src.utils.config import config
 
@@ -85,9 +86,13 @@ def call_llm(
 
     sys_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
 
+    # Get Ollama host from environment variable or use default
+    ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
+    client = ollama.Client(host=ollama_host)
+
     for attempt in range(config.max_retries + 1):
         try:
-            response = ollama.chat(
+            response = client.chat(
                 model=model,
                 messages=[
                     {"role": "system", "content": sys_prompt},

@@ -185,7 +185,9 @@ def plan_solution(*, analysis: str, model: str) -> str:
         "### Validation and Correctness Checks\n"
         "- Describe checks or conditions needed to ensure correctness\n\n"
         "### Complexity Considerations\n"
-        "- Expected time and space complexity at a high level\n\n"
+        "MANDATORY: You MUST explicitly state both complexities using this exact format:\n"
+        "Time Complexity: O(...)\n"
+        "Space Complexity: O(...)\n\n"
         "INPUT ANALYSIS:\n\n"
         f"{analysis}"
     )
