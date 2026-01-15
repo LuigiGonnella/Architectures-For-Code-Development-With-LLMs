@@ -14,7 +14,7 @@ from datetime import datetime
 
 from tqdm import tqdm
 
-from src.core.pipeline import build_single_agent_graph
+from src.core.single_agent.pipeline import build_single_agent_graph
 from src.utils.task_loader import load_tasks
 from src.utils.test_runner import run_tests_silent
 from src.utils.config import config

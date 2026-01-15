@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 
-from src.core.agent import (
+from src.core.single_agent.agent import (
     analyze_task,
     plan_solution,
     generate_code,
