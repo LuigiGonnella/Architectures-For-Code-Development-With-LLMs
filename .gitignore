@@ -22,3 +22,7 @@ experiments/
 
 # Models (do NOT commit large files)
 models/
+
+#WebApp
+node_modules/
+single_agent_webapp/
