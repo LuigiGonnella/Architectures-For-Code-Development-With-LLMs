@@ -39,11 +39,11 @@ def consolidation_node(state: CoderAgentState) -> CoderAgentState:
     if state.get("show_node_info"):
         if state["code"]:
             lines = state["code"].split("\n")
-            print(f"\nCode generation complete")
+            print("\nCode generation complete")
             print(f"Lines: {len(lines)}")
-            print(f"Status: Ready for critic review")
+            print("Status: Ready for critic review")
         else:
-            print(f"\nNo code generated")
+            print("\nNo code generated")
             if state.get("errors"):
                 print(f"Errors: {len(state['errors'])}")
                 for err in state["errors"][:3]:

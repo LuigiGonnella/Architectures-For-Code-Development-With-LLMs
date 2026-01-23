@@ -114,7 +114,7 @@ def code_validator_node(state: CoderAgentState) -> CoderAgentState:
                 if len(logic_warnings) > 3:
                     print(f"     ... and {len(logic_warnings) - 3} more")
             else:
-                print(f"\n  Code validated (no syntax errors)")
+                print("\n  Code validated (no syntax errors)")
             print()
         else:
             print(f"\n  Syntax errors found ({len(syntax_errors)}):")

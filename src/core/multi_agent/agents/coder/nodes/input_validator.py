@@ -98,12 +98,12 @@ def input_validator_node(state: CoderAgentState) -> CoderAgentState:
 
     if state.get("show_node_info"):
         if state["should_proceed"]:
-            print(f"\nInput validation passed")
-            print(f"   • Signature: valid")
+            print("\nInput validation passed")
+            print("   • Signature: valid")
             print(f"   • Plan: {len(state.get('plan', '').split())} words")
             print(f"   • Task ID: {state.get('task_id')}\n")
         else:
-            print(f"\nInput validation failed:")
+            print("\nInput validation failed:")
             for error in validation_errors:
                 print(f"   ✗ {error}")
             print()

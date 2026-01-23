@@ -49,7 +49,7 @@ def code_optimizer_node(state: CoderAgentState) -> CoderAgentState:
             lines_before = len(state["validated_code"].split("\n"))
             lines_after = len(optimized_code.split("\n"))
             
-            print(f"\n  Code optimized:")
+            print("\n  Code optimized:")
             print(f"     Lines: {lines_before} → {lines_after}")
             
             preview = "\n".join(optimized_code.split("\n")[:5])
