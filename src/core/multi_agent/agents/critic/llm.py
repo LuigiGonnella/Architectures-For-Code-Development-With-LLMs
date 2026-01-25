@@ -198,9 +198,12 @@ FORMAT:
 - [Complexity] ...
 - [Style] ...
 
-### Refinement Instructions (Step-by-Step)
-1. At line X, change ... to ...
-2. Handle edge case Y by adding...
+### Refinement Instructions
+1. [Logic/Requirement] Clearly state what logic needs to be fixed or added.
+2. [Edge Case] Specify which edge case needs handling and how.
+3. [Constraint] Mention any constraint that was violated.
+4. DO NOT reference specific line numbers or "previous code", as the Coder generates code from scratch.
+5. Focus on WHAT the code should do, not just what was wrong.
 """
 
 def synthesize_feedback(
