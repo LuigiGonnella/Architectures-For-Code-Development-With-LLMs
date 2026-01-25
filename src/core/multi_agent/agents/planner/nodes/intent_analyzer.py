@@ -10,9 +10,7 @@ def intent_analysis_node(state: AgentState) -> AgentState:
     """
     Extract core intent, classify task, identify success metrics.
     """
-    print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  PHASE 1: INTENT ANALYSIS                                ║")
-    print("╚══════════════════════════════════════════════════════════╝")
+    print("\n  - PHASE 1: INTENT ANALYSIS")
 
     user_prompt = f"""## Task
 Analyze the following user request and extract the true intent.
@@ -41,13 +39,13 @@ Think step-by-step in <thinking> tags, then provide your analysis in <output> ta
         state["intent_analysis"] = intent_analysis
 
         if state.get("show_node_info"):
-            print(f"\n📋 Intent: {intent_analysis.get('intent', 'N/A')}")
-            print(f"🏷️  Task Type: {intent_analysis.get('task_type', 'N/A')}")
-            print(f"🎯 Domain: {intent_analysis.get('domain', 'N/A')}")
-            print(f"✓  Assumptions: {len(intent_analysis.get('assumptions', []))}")
+            print(f"    Intent: {intent_analysis.get('intent', 'N/A')}")
+            print(f"    Task Type: {intent_analysis.get('task_type', 'N/A')}")
+            print(f"    Domain: {intent_analysis.get('domain', 'N/A')}")
+            print(f"    Assumptions: {len(intent_analysis.get('assumptions', []))}")
 
     except json.JSONDecodeError as e:
-        print(f"⚠️  JSON parse error: {e}")
+        print(f"    JSON parse error: {e}")
         state["intent_analysis"] = {"raw_response": response, "error": str(e)}
         if "errors" not in state:
             state["errors"] = []

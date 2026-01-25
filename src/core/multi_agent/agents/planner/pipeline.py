@@ -22,7 +22,7 @@ def should_refine(state: AgentState) -> str:
     iteration_count = state.get("iteration_count", 0)
 
     if plan_approved:
-        print("\n✅ Plan approved! Proceeding to consolidation.")
+        print("\n  Plan approved! Proceeding to consolidation.")
         return "consolidation"
 
     if iteration_count < 2:
@@ -39,12 +39,11 @@ def should_refine(state: AgentState) -> str:
             retry_phase = "architecture_design"  # Default fallback
 
         print(
-            f"\n⚠️  Plan needs revision. Retrying from {retry_phase} (iteration {iteration_count + 1}/2)"
+            f"\n  Plan needs revision. Retrying from {retry_phase} (iteration {iteration_count+1}/2)"
         )
-        state["iteration_count"] = iteration_count + 1
         return retry_phase
 
-    print("\n⚠️  Max iterations reached. Proceeding with best-effort plan.")
+    print("\n  Max iterations reached. Proceeding with best-effort plan.")
     return "consolidation"
     
 

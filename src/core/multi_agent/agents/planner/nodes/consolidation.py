@@ -4,9 +4,7 @@ def consolidation_node(state: AgentState) -> AgentState:
     """
     Consolidate all planning phases into final unified plan.
     """
-    print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  CONSOLIDATION: Final Plan Assembly                      ║")
-    print("╚══════════════════════════════════════════════════════════╝")
+    print("\n  - CONSOLIDATION: Final Plan Assembly")
 
     final_plan = {
         "task_id": state.get("task_id"),
@@ -23,13 +21,9 @@ def consolidation_node(state: AgentState) -> AgentState:
     state["final_plan"] = final_plan
 
     if state.get("show_node_info"):
-        print("\n✨ Final plan assembled")
-        print(
-            f"📦 Components: {len(final_plan.get('architecture', {}).get('components', []))}"
-        )
-        print(f"🔄 Iterations: {final_plan.get('iterations', 0)}")
-        print(
-            f"{'✅ Status: APPROVED' if final_plan.get('approved') else '⚠️  Status: BEST EFFORT'}"
-        )
+        print("    Final plan assembled")
+        print(f"    Components: {len(final_plan.get('architecture', {}).get('components', []))}")
+        print(f"    Iterations: {final_plan.get('iterations', 0)}")
+        print(f"    {'Status: APPROVED' if final_plan.get('approved') else 'Status: BEST EFFORT'}")
 
     return state

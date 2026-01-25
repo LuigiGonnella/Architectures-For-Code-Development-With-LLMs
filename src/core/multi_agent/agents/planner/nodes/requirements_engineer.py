@@ -11,9 +11,7 @@ def requirements_engineering_node(state: AgentState) -> AgentState:
     """
     Define comprehensive functional and non-functional requirements.
     """
-    print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  PHASE 2: REQUIREMENTS ENGINEERING                       ║")
-    print("╚══════════════════════════════════════════════════════════╝")
+    print("\n  - PHASE 2: REQUIREMENTS ENGINEERING")
 
     # Use compressed summary for efficiency
     intent_summary = compress_phase_output(
@@ -56,17 +54,13 @@ Then provide complete requirements in <output> tags as JSON.
         if state.get("show_node_info"):
             func_count = len(requirements.get("functional", []))
             edge_count = len(requirements.get("edge_cases", []))
-            print(f"\n📝 Functional Requirements: {func_count}")
-            print(
-                f"⚡ Performance Constraints: {requirements.get('non_functional', {}).get('performance', {})}"
-            )
-            print(
-                f"🔒 Security Requirements: {len(requirements.get('non_functional', {}).get('security', []))}"
-            )
-            print(f"🧪 Edge Cases Identified: {edge_count}")
+            print(f"    Functional Requirements: {func_count}")
+            print(f"    Performance Constraints: {requirements.get('non_functional', {}).get('performance', {})}")
+            print(f"    Security Requirements: {len(requirements.get('non_functional', {}).get('security', []))}")
+            print(f"    Edge Cases Identified: {edge_count}")
 
     except json.JSONDecodeError as e:
-        print(f"⚠️  JSON parse error: {e}")
+        print(f"    JSON parse error: {e}")
         state["requirements"] = {"raw_response": response, "error": str(e)}
         if "errors" not in state:
             state["errors"] = []

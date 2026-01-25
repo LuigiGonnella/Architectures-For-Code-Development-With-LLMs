@@ -30,11 +30,6 @@ def main():
 
     # Load Tasks
     tasks = load_tasks(args.task_file)
-    if args.task_id:
-        tasks = [t for t in tasks if str(t.get("id")) == args.task_id]
-        if not tasks:
-            print(f"No task found with ID: {args.task_id}")
-            return
 
     print(f"Starting Multi-Agent Pipeline for {len(tasks)} tasks...")
 

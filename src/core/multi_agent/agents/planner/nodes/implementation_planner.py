@@ -11,9 +11,7 @@ def implementation_planning_node(state: AgentState) -> AgentState:
     """
     Create detailed step-by-step implementation guidance.
     """
-    print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  PHASE 4: IMPLEMENTATION PLANNING                        ║")
-    print("╚══════════════════════════════════════════════════════════╝")
+    print("\n  - PHASE 4: IMPLEMENTATION PLANNING")
 
     architecture_summary = compress_phase_output(
         "architecture", state.get("architecture", {})
@@ -57,12 +55,12 @@ Then provide the complete plan in <output> tags as JSON.
 
         if state.get("show_node_info"):
             components = implementation_plan.get("components", [])
-            print(f"\n📋 Implementation Components: {len(components)}")
+            print(f"    Implementation Components: {len(components)}")
             total_steps = sum(len(c.get("steps", [])) for c in components)
-            print(f"⚙️  Total Implementation Steps: {total_steps}")
+            print(f"    Total Implementation Steps: {total_steps}")
 
     except json.JSONDecodeError as e:
-        print(f"⚠️  JSON parse error: {e}")
+        print(f"    JSON parse error: {e}")
         state["implementation_plan"] = {"raw_response": response, "error": str(e)}
         if "errors" not in state:
             state["errors"] = []

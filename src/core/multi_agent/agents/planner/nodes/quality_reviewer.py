@@ -11,9 +11,7 @@ def quality_review_node(state: AgentState) -> AgentState:
     """
     Review complete PLAN for quality before handoff to coder agent.
     """
-    print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  PHASE 5: PLAN QUALITY REVIEW                            ║")
-    print("╚══════════════════════════════════════════════════════════╝")
+    print("\n  - PHASE 5: PLAN QUALITY REVIEW")
 
     complete_plan = {
         "intent": compress_phase_output(
@@ -80,20 +78,22 @@ You are reviewing the PLAN (not code). The coder agent generates code later.
         issues = quality_review.get("issues", [])
 
         if state.get("show_node_info"):
-            print(f"\n📊 Completeness Score: {completeness}/10")
-            print(f"🔍 Issues Found: {len(issues)}")
+            print(f"    Completeness Score: {completeness}/10")
+            print(f"    Issues Found: {len(issues)}")
             for issue in issues[:3]:  # Show top 3
-                print(
-                    f"   [{issue.get('severity')}] {issue.get('description')[:60]}..."
-                )
-            print(
-                f"\n{'✅ APPROVED' if approval_status == 'approved' else '⚠️  NEEDS REVISION'}"
-            )
+                print(f"      - [{issue.get('severity')}] {issue.get('description')[:60]}...")
+            print(f"    {'APPROVED' if approval_status == 'approved' else 'NEEDS REVISION'}")
 
-        state["plan_approved"] = approval_status == "approved"
+        is_approved = approval_status == "approved"
+        state["plan_approved"] = is_approved
+        
+        # Increment iteration count if not approved
+        if not is_approved:
+            current_count = state.get("iteration_count", 0)
+            state["iteration_count"] = current_count + 1
 
     except json.JSONDecodeError as e:
-        print(f"⚠️  JSON parse error: {e}")
+        print(f"    JSON parse error: {e}")
         state["quality_review"] = {"raw_response": response, "error": str(e)}
         state["plan_approved"] = False
         if "errors" not in state:

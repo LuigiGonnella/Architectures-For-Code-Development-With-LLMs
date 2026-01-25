@@ -33,7 +33,7 @@ def extract_and_parse_json(response: str, max_attempts: int = 3) -> Dict[Any, An
             match = extract_func(response)
             if match:
                 json_str = match.group(1) if i < 2 else match.group(0)
-    else:
+            else:
                 json_str = response  # Use raw response
 
             # Clean common issues

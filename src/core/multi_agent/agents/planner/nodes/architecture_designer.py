@@ -11,9 +11,7 @@ def architecture_design_node(state: AgentState) -> AgentState:
     """
     Design optimal architecture: components, patterns, data structures.
     """
-    print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  PHASE 3: ARCHITECTURE DESIGN                            ║")
-    print("╚══════════════════════════════════════════════════════════╝")
+    print("\n  - PHASE 3: ARCHITECTURE DESIGN")
 
     requirements_summary = compress_phase_output(
         "requirements", state.get("requirements", {})
@@ -79,15 +77,13 @@ Then provide your architecture in <output> tags as JSON.
 
         if state.get("show_node_info"):
             components = architecture.get("components", [])
-            print(f"\n🏗️  Components Designed: {len(components)}")
+            print(f"    Components Designed: {len(components)}")
             for comp in components[:3]:  # Show first 3
-                print(f"   • {comp.get('name')}: {comp.get('responsibility')}")
-            print(
-                f"📐 Design Patterns: {len(architecture.get('exception_hierarchy', []))}"
-            )
+                print(f"      - {comp.get('name')}: {comp.get('responsibility')}")
+            print(f"    Design Patterns: {len(architecture.get('exception_hierarchy', []))}")
 
     except json.JSONDecodeError as e:
-        print(f"⚠️  JSON parse error: {e}")
+        print(f"    JSON parse error: {e}")
         state["architecture"] = {"raw_response": response, "error": str(e)}
         if "errors" not in state:
             state["errors"] = []
