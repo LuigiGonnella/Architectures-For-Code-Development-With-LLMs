@@ -46,9 +46,9 @@ def main():
         )
         
         if not plan_result:
-            print("\n  Planning failed. Skipping task.")
+            print("\n[Planner] Planning failed. Skipping task.")
             continue
-        print("\n  Plan created.")
+        print("\n[Planner] Plan created.")
 
         # 2. Coder
         plan_str = json.dumps(plan_result, indent=2)
@@ -59,7 +59,7 @@ def main():
         
         for attempt in range(args.max_retries + 1):
             iter_msg = f"Initial Generation" if attempt == 0 else f"Refinement Iteration {attempt}/{args.max_retries}"
-            print(f"\n[Coder] {iter_msg}...")
+            print(f"\n\n[Coder] {iter_msg}...")
             
             # A. Generate Code
             coder_result = coder.generate_code(
@@ -72,9 +72,9 @@ def main():
             )
             
             if not coder_result["success"]:
-                print("\n  Code generation failed.")
+                print("\n[Coder] Code generation failed.")
                 break
-            print("\n  Code generated.")
+            print("\n[Coder] Code generated.")
                 
             current_code = coder_result["code"]
             
@@ -84,7 +84,7 @@ def main():
             metrics = compute_quality_metrics(current_code)
             
             # B. Critique
-            print("\n[Critic] Reviewing code...")
+            print("\n\n[Critic] Reviewing code...")
             
             critique = critic.critique(
                 task_id=task_id,
@@ -99,14 +99,22 @@ def main():
             
             critic_feedback = critique
             
-            print("\n  Review completed.")
+            print("\n[Critic] Review completed.")
 
         # Final Test Execution
-        print(f"\nTask {task_id} Completed")
+        print(f"\n\n[System] Task {task_id} Completed")
         
         if args.test_file and current_code:
             print("\n[System] Running final verification tests...")
             passed, failed, error = run_tests_silent(task_id, current_code, args.test_file)
+            
+            log_entry = f"Task: {task_id} | Passed: {passed} | Failed: {failed}"
+            if error:
+                log_entry += f" | Error: {error}"
+            
+            with open("test_results.log", "a") as log_file:
+                log_file.write(log_entry + "\n")
+                
             if passed > 0 and failed == 0:
                 print(f"    Tests PASSED ({passed} passed)")
             else:
@@ -118,7 +126,7 @@ def main():
             print("\nFinal Code:")
             print("-" * 40)
             print(current_code)
-            print("-" * 40)
+            print("-\n" * 40)
 
 if __name__ == "__main__":
     main()
