@@ -95,6 +95,8 @@ def call_llm(
                 ],
                 options={
                     "temperature": config.temperature,
+                    "num_predict": 4096,
+                    "num_ctx": 8192,
                 },
             )
             return response["message"]["content"]

@@ -18,38 +18,81 @@ def extract_and_parse_json(response: str, max_attempts: int = 3) -> Dict[Any, An
     """
     Extract and parse JSON from LLM response with automatic repair.
     """
-    attempts = [
-        # Attempt 1: Extract from <output> tags
-        lambda r: re.search(r"<output>\s*(.+?)\s*</output>", r, re.DOTALL),
-        # Attempt 2: Extract from ```json blocks
-        lambda r: re.search(r"```(?:json)?\s*(.+?)\s*```", r, re.DOTALL),
-        # Attempt 3: Find first { to last }
-        lambda r: re.search(r"\{.+\}", r, re.DOTALL),
-    ]
-
-    for i, extract_func in enumerate(attempts[:max_attempts]):
-        try:
-            # Try to extract JSON
-            match = extract_func(response)
-            if match:
-                json_str = match.group(1) if i < 2 else match.group(0)
-            else:
-                json_str = response  # Use raw response
-
-            # Clean common issues
-            json_str = json_str.strip()
-            # Remove trailing commas before } or ]
-            json_str = re.sub(r",\s*([}\]])", r"\1", json_str)
-
-            # Try to parse
-            return json.loads(json_str)
-
-        except (json.JSONDecodeError, AttributeError):
+    # Combined Approach: Robust brace counting + Regex Fallback + Unescaped Newline Handling
+    
+    candidates = []
+    
+    # 1. Clean thinking blocks first
+    clean_text = re.sub(r"<thinking>.*?</thinking>", "", response, flags=re.DOTALL).strip()
+    
+    # 2. Heuristic: Brace Counting
+    # Find all top-level {} blocks in the cleaned text, or original text if clean failed
+    target_text = clean_text if clean_text else response
+    
+    brace_count = 0
+    start_index = -1
+    in_string = False
+    escape = False
+    
+    for i, char in enumerate(target_text):
+        if char == '"' and not escape:
+            in_string = not in_string
+        elif char == '\\' and in_string:
+            escape = not escape
+        elif not in_string:
+            if char == '{':
+                if brace_count == 0:
+                    start_index = i
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if brace_count == 0 and start_index != -1:
+                    candidates.append(target_text[start_index : i + 1])
+                    start_index = -1
+        
+        if char != '\\':
+            escape = False
+            
+    # Add regex candidates as fallback
+    regex_candidates = []
+    output_match = re.search(r"<output>\s*(.+?)\s*</output>", response, re.DOTALL)
+    if output_match:
+        regex_candidates.append(output_match.group(1))
+        
+    code_match = re.search(r"```(?:json)?\s*(.+?)\s*```", response, re.DOTALL)
+    if code_match:
+        regex_candidates.append(code_match.group(1))
+        
+    # Process all candidates (Brace ones first, then regex)
+    # Prefer the LAST brace candidate (often the final output)
+    all_candidates = list(reversed(candidates)) + regex_candidates
+    
+    for json_str in all_candidates:
+        if not json_str: 
             continue
+            
+        # Clean common issues
+        json_str = json_str.strip()
+        json_str = re.sub(r",\s*([}\]])", r"\1", json_str) # Trailing commas
+        
+        try:
+            return json.loads(json_str, strict=False)
+        except json.JSONDecodeError:
+            try:
+                fixed_str = json_str.replace('\n', '\\n')
+                return json.loads(fixed_str, strict=False)
+            except json.JSONDecodeError:
+                continue
+
+    # Final Attempt: The whole response
+    try:
+        return json.loads(response.strip(), strict=False)
+    except json.JSONDecodeError:
+        pass
 
     # All attempts failed
     raise json.JSONDecodeError(
-        f"Failed to parse JSON after {max_attempts} attempts. Response: {response[:200]}...",
+        f"Failed to parse JSON after attempting {len(all_candidates)} extractions. Response: {response[:200]}...",
         response,
         0,
     )
