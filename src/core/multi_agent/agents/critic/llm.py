@@ -73,9 +73,9 @@ def analyze_correctness(
     model: str,
 ) -> str:
     exec_block = (
-        f"\nEXECUTION FEEDBACK (SUMMARY):\n{exec_summary}\n"
+        f"\nEXECUTION SUMMARY:\n{exec_summary}\n"
         if exec_summary
-        else "\nEXECUTION FEEDBACK (SUMMARY):\nNo execution data available.\n"
+        else "\nEXECUTION SUMMARY:\nNo execution data available.\n"
     )
 
     prompt = f"""
