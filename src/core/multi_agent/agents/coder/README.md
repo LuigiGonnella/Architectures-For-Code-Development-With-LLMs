@@ -193,8 +193,8 @@ errors: List[str]                            # All errors accumulated
   - Unreachable code (code after return at same indent)
 
 **Acceptance policy:**
-- ✅ Accepts code with warnings (logic issues)
-- ❌ Rejects code with syntax errors
+- Accepts code with warnings (logic issues)
+- Rejects code with syntax errors
 
 **Output:**
 - `validated_code`: Code if syntax valid, None if invalid
