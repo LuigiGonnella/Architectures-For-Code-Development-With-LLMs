@@ -126,7 +126,9 @@ def main():
             print("\nFinal Code:")
             print("-" * 40)
             print(current_code)
-            print("-\n" * 40)
+            print("-" * 40)
+        
+        print("\n\n")
 
 if __name__ == "__main__":
     main()
