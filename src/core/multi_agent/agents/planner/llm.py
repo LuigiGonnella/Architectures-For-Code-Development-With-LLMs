@@ -1,13 +1,9 @@
 """
 llm.py
 
-SOTA LLM prompts for multi-node planner agent.
-Hybrid approach: Common base + node-specific specialization.
-Optimized for Mistral 7B with chain-of-thought reasoning.
+Prompts and helpers for the Planner Agent.
 """
 
-import ollama
-import time
 import json
 import re
 from typing import Dict, Any
@@ -15,100 +11,53 @@ from src.utils.config import config
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# MODEL-SPECIFIC PROFILES
+# UTILITIES
 # ═══════════════════════════════════════════════════════════════════════
 
-
-def get_model_profile(model: str) -> Dict[str, Any]:
+def extract_and_parse_json(response: str, max_attempts: int = 3) -> Dict[Any, Any]:
     """
-    Get optimized settings based on model size.
-    Automatically adapts to 7B, 13B, 70B+ models.
-
-    Args:
-        model: Model identifier (e.g., "mistral:7b", "llama3.1:70b")
-
-    Returns:
-        Dict with optimal settings for that model class
+    Extract and parse JSON from LLM response with automatic repair.
     """
-    model_lower = model.lower()
+    attempts = [
+        # Attempt 1: Extract from <output> tags
+        lambda r: re.search(r"<output>\s*(.+?)\s*</output>", r, re.DOTALL),
+        # Attempt 2: Extract from ```json blocks
+        lambda r: re.search(r"```(?:json)?\s*(.+?)\s*```", r, re.DOTALL),
+        # Attempt 3: Find first { to last }
+        lambda r: re.search(r"\{.+\}", r, re.DOTALL),
+    ]
 
-    # Detect model size
-    if any(size in model_lower for size in ["7b", "8b"]) or model_lower in [
-        "mistral",
-        "mistral:latest",
-    ]:
-        # Small models (7B-8B) - Mistral 7B optimization
-        # Note: 'mistral' defaults to 7B variant
-        return {
-            "max_tokens": {
-                "intent": 768,
-                "requirements": 1024,
-                "architecture": 1536,
-                "implementation": 1536,
-                "quality": 1024,
-            },
-            "temperature": {
-                "intent": 0.2,
-                "requirements": 0.2,
-                "architecture": 0.35,  # Lower than before for 7B stability
-                "implementation": 0.25,
-                "quality": 0.3,
-            },
-            "top_k": 40,
-            "repeat_penalty": 1.15,
-            "compress_context": True,  # CRITICAL for 7B
-            "use_examples": True,
-        }
-    elif any(size in model_lower for size in ["13b", "14b"]):
-        # Medium models
-        return {
-            "max_tokens": {
-                "intent": 1024,
-                "requirements": 1536,
-                "architecture": 2048,
-                "implementation": 2048,
-                "quality": 1536,
-            },
-            "temperature": {
-                "intent": 0.2,
-                "requirements": 0.2,
-                "architecture": 0.4,
-                "implementation": 0.3,
-                "quality": 0.3,
-            },
-            "top_k": 50,
-            "repeat_penalty": 1.12,
-            "compress_context": True,
-            "use_examples": True,
-        }
+    for i, extract_func in enumerate(attempts[:max_attempts]):
+        try:
+            # Try to extract JSON
+            match = extract_func(response)
+            if match:
+                json_str = match.group(1) if i < 2 else match.group(0)
     else:
-        # Large models (70B+)
-        return {
-            "max_tokens": {
-                "intent": 1536,
-                "requirements": 2048,
-                "architecture": 3072,
-                "implementation": 3072,
-                "quality": 2048,
-            },
-            "temperature": {
-                "intent": 0.2,
-                "requirements": 0.2,
-                "architecture": 0.4,
-                "implementation": 0.3,
-                "quality": 0.3,
-            },
-            "top_k": 60,
-            "repeat_penalty": 1.1,
-            "compress_context": False,  # Large models handle full context
-            "use_examples": False,  # Don't need examples
-        }
+                json_str = response  # Use raw response
+
+            # Clean common issues
+            json_str = json_str.strip()
+            # Remove trailing commas before } or ]
+            json_str = re.sub(r",\s*([}\]])", r"\1", json_str)
+
+            # Try to parse
+            return json.loads(json_str)
+
+        except (json.JSONDecodeError, AttributeError):
+            continue
+
+    # All attempts failed
+    raise json.JSONDecodeError(
+        f"Failed to parse JSON after {max_attempts} attempts. Response: {response[:200]}...",
+        response,
+        0,
+    )
 
 
 def compress_phase_output(phase_name: str, phase_data: Dict[str, Any]) -> str:
     """
     Compress phase output to essential information only.
-    Critical for maintaining context window on 7B models.
 
     Args:
         phase_name: Name of the phase
@@ -642,169 +591,3 @@ Remember: You are reviewing the PLAN, not code. The coder agent will generate co
 """
 
 PLAN_QUALITY_REVIEWER_PROMPT = BASE_SYSTEM_PROMPT + PLAN_QUALITY_REVIEWER_SPECIFIC
-
-
-# ═══════════════════════════════════════════════════════════════════════
-# JSON REPAIR UTILITY
-# ═══════════════════════════════════════════════════════════════════════
-
-
-def extract_and_parse_json(response: str, max_attempts: int = 3) -> Dict[Any, Any]:
-    """
-    Extract and parse JSON from LLM response with automatic repair.
-
-    Handles common issues:
-    - JSON wrapped in <output> tags (chain-of-thought)
-    - Markdown code blocks
-    - Trailing commas
-    - Missing quotes
-    - Extra text before/after JSON
-
-    Args:
-        response: Raw LLM response
-        max_attempts: Number of repair strategies to try
-
-    Returns:
-        Parsed JSON dict
-
-    Raises:
-        json.JSONDecodeError: If all repair attempts fail
-    """
-    attempts = [
-        # Attempt 1: Extract from <output> tags
-        lambda r: re.search(r"<output>\s*(.+?)\s*</output>", r, re.DOTALL),
-        # Attempt 2: Extract from ```json blocks
-        lambda r: re.search(r"```(?:json)?\s*(.+?)\s*```", r, re.DOTALL),
-        # Attempt 3: Find first { to last }
-        lambda r: re.search(r"\{.+\}", r, re.DOTALL),
-    ]
-
-    for i, extract_func in enumerate(attempts[:max_attempts]):
-        try:
-            # Try to extract JSON
-            match = extract_func(response)
-            if match:
-                json_str = match.group(1) if i < 2 else match.group(0)
-            else:
-                json_str = response  # Use raw response
-
-            # Clean common issues
-            json_str = json_str.strip()
-            # Remove trailing commas before } or ]
-            json_str = re.sub(r",\s*([}\]])", r"\1", json_str)
-
-            # Try to parse
-            return json.loads(json_str)
-
-        except (json.JSONDecodeError, AttributeError):
-            continue
-
-    # All attempts failed
-    raise json.JSONDecodeError(
-        f"Failed to parse JSON after {max_attempts} attempts. Response: {response[:200]}...",
-        response,
-        0,
-    )
-
-
-# ═══════════════════════════════════════════════════════════════════════
-# LLM CALL FUNCTION
-# ═══════════════════════════════════════════════════════════════════════
-
-
-def call_llm(
-    *,
-    user_prompt: str,
-    system_prompt: str,
-    model: str,
-    temperature: float = None,
-    max_tokens: int = None,
-    node_name: str = "default",
-) -> str:
-    """
-    Core LLM call for all planner nodes.
-    Automatically adapts to model size using profiles.
-
-    Args:
-        user_prompt: The specific task/question for this node (DATA ONLY)
-        system_prompt: The node-specific system prompt (INSTRUCTIONS)
-        model: Ollama model identifier
-        temperature: Sampling temperature (None = use profile default)
-        max_tokens: Maximum response tokens (None = use profile default)
-        node_name: Node identifier for profile optimization
-
-    Returns:
-        str: LLM response (typically JSON in <output> tags)
-
-    Raises:
-        RuntimeError: After all retry attempts exhausted
-        ConnectionError: Cannot connect to Ollama
-    """
-    # Get model-specific profile
-    profile = get_model_profile(model)
-
-    # Use profile defaults if not specified
-    if temperature is None:
-        temperature = profile["temperature"].get(node_name, 0.2)
-    if max_tokens is None:
-        max_tokens = profile["max_tokens"].get(node_name, 1536)
-
-    base_delay = 0.5
-    max_delay = 8.0
-    last_exception = None
-
-    for attempt in range(config.max_retries + 1):
-        try:
-            response = ollama.chat(
-                model=model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                options={
-                    "temperature": temperature,
-                    "top_p": 0.9,
-                    "top_k": profile["top_k"],  # Use profile value
-                    "num_predict": max_tokens,
-                    "repeat_penalty": profile["repeat_penalty"],  # Use profile value
-                    "repeat_last_n": 256,
-                    "stop": ["</output>", "\n\n\n\n", "```"],
-                    "num_ctx": 8192,
-                },
-            )
-
-            content = response.get("message", {}).get("content", "")
-            if not content or len(content.strip()) < 10:
-                raise ValueError(f"Empty response (attempt {attempt + 1})")
-
-            return content
-
-        except ollama.ResponseError as e:
-            last_exception = e
-            if attempt == config.max_retries:
-                raise RuntimeError(
-                    f"LLM API error after {config.max_retries + 1} attempts: {str(e)}"
-                ) from e
-
-        except ollama.RequestError as e:
-            last_exception = e
-            if attempt == config.max_retries:
-                raise ConnectionError(
-                    f"Cannot connect to Ollama. Ensure 'ollama serve' is running: {str(e)}"
-                ) from e
-
-        except Exception as e:
-            last_exception = e
-            if attempt == config.max_retries:
-                raise RuntimeError(
-                    f"Unexpected error after {config.max_retries + 1} attempts: {str(e)}"
-                ) from e
-
-        if attempt < config.max_retries:
-            delay = min(base_delay * (2**attempt), max_delay)
-            print(f"⏳ Retry {attempt + 1} in {delay:.1f}s...")
-            time.sleep(delay)
-
-    raise RuntimeError(
-        f"Failed after {config.max_retries + 1} attempts: {str(last_exception)}"
-    )
