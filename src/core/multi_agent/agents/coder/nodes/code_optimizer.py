@@ -4,6 +4,7 @@ Code Optimizer Node - Optimizes code for readability and performance.
 
 from src.core.multi_agent.agents.coder.state import CoderAgentState
 from src.core.multi_agent.agents.coder.llm import optimize_code
+from src.utils.code_parser import extract_python_code
 
 
 def code_optimizer_node(state: CoderAgentState) -> CoderAgentState:
@@ -33,24 +34,30 @@ def code_optimizer_node(state: CoderAgentState) -> CoderAgentState:
         state["optimized_code"] = None
         return state
     
+    print("\n  - PHASE 6: CODE OPTIMIZATION")
+    
     try:
         # Use LLM to optimize code
-        optimized_code = optimize_code(
+        raw_optimized = optimize_code(
             code=state["validated_code"],
             signature=state.get("signature"),
             plan=state.get("plan"),
             edge_cases=state.get("edge_cases", []),
             model=state.get("model"),
         )
-        
+
+        optimized_code = extract_python_code(raw_optimized)
+        if not optimized_code:
+            raise ValueError("Failed to extract valid Python code from optimizer output")
+
         state["optimized_code"] = optimized_code
         
         if state.get("show_node_info"):
             lines_before = len(state["validated_code"].split("\n"))
             lines_after = len(optimized_code.split("\n"))
             
-            print("\n  Code optimized:")
-            print(f"     Lines: {lines_before} → {lines_after}")
+            print("    Code optimized:")
+            print(f"      Lines: {lines_before} → {lines_after}")
             
             preview = "\n".join(optimized_code.split("\n")[:5])
             if len(optimized_code.split("\n")) > 5:
@@ -63,6 +70,6 @@ def code_optimizer_node(state: CoderAgentState) -> CoderAgentState:
         # Fallback to validated code without optimization
         state["optimized_code"] = state["validated_code"]
         if state.get("show_node_info"):
-            print(f"  {error_msg} (using unoptimized code)\n")
+            print(f"    {error_msg} (using unoptimized code)\n")
     
     return state

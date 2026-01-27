@@ -18,9 +18,7 @@ Flow:
 from langgraph.graph import StateGraph, START, END
 from src.core.multi_agent.agents.coder.state import CoderAgentState
 from src.core.multi_agent.agents.coder.nodes.input_validator import input_validator_node
-from src.core.multi_agent.agents.coder.nodes.edge_case_analyzer import (
-    edge_case_analyzer_node,
-)
+from src.core.multi_agent.agents.coder.nodes.edge_case_analyzer import edge_case_analyzer_node
 from src.core.multi_agent.agents.coder.nodes.cot_generator import cot_generator_node
 from src.core.multi_agent.agents.coder.nodes.code_generator import code_generator_node
 from src.core.multi_agent.agents.coder.nodes.code_validator import code_validator_node
@@ -33,21 +31,26 @@ def consolidation_node(state: CoderAgentState) -> CoderAgentState:
 
     Final step that packages code for delivery to critic agent.
     """
+    print("\n  - PHASE 7: CODE CONSOLIDATION")
+
     # Use optimized code as final output
     state["code"] = state.get("optimized_code")
 
-    if state.get("show_node_info"):
+    if state.get("show_node_info") or not state["code"]:
         if state["code"]:
             lines = state["code"].split("\n")
-            print("\nCode generation complete")
-            print(f"Lines: {len(lines)}")
-            print("Status: Ready for critic review")
+            print("    Code generation complete")
+            print(f"    Lines: {len(lines)}")
+            print("    Status: Ready for critic review")
         else:
-            print("\nNo code generated")
+            print("      No code generated - debugging info:")
+            print(f"       raw_code: {'✓' if state.get('raw_code') else '✗'}")
+            print(f"       validated_code: {'✓' if state.get('validated_code') else '✗'}")
+            print(f"       optimized_code: {'✓' if state.get('optimized_code') else '✗'}")
             if state.get("errors"):
-                print(f"Errors: {len(state['errors'])}")
-                for err in state["errors"][:3]:
-                    print(f"   - {err}")
+                print(f"       Errors: {len(state['errors'])}")
+                for err in state["errors"][:5]:
+                    print(f"         - {err}")
 
     return state
 

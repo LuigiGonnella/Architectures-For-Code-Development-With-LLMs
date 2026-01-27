@@ -1,187 +1,177 @@
-# 🎯 Multi-Node Planner Agent - Summary
+# Planner Agent - Multi-Node Planning Pipeline
 
-## ✅ What Was Built
+## Overview
 
-I've transformed your planner from a **single monolithic prompt** into a **state-of-the-art multi-node agent** with specialized phases.
+The **Planner Agent** is an autonomous multi-node LLM agent responsible for decomposing high-level user requests into comprehensive, production-grade implementation plans. It follows a Chain-of-Thought (CoT) approach, breaking the planning process into specialized phases to ensure depth, accuracy, and robustness.
 
-### 📁 Files Modified/Created:
+Unlike simple "one-shot" planners, this agent uses a directed graph to progressively refine the plan, validating it at each step before handing it off to the Coder Agent.
 
-1. **`llm.py`** - Simplified to 5 specialized prompts (one per node)
-2. **`state.py`** - Comprehensive AgentState tracking all planning phases
-3. **`pipeline.py`** - Complete LangGraph implementation with 6 nodes
-4. **`agent.py`** - High-level API for easy usage
+## Architecture
 
----
+### 5-Phase Pipeline with Feedback Loop
 
-## 🎨 Key Improvements Over Single-Agent
+```mermaid
+graph TD
+    Start([Start]) --> Intent[PHASE 1: Intent Analysis]
+    Intent --> Reqs[PHASE 2: Requirements Engineering]
+    Reqs --> Arch[PHASE 3: Architecture Design]
+    Arch --> Impl[PHASE 4: Implementation Planning]
+    Impl --> Quality[PHASE 5: Quality Review]
+    
+    Quality -- "Approved (Score >= 8)" --> Consolidation[Consolidation]
+    Quality -- "Needs Revision" --> Router{Iterate?}
+    
+    Router -- "Retry Phase" --> Arch
+    Router -- "Max Retries Reached" --> Consolidation
+    
+    Consolidation --> End([End])
+```
 
-| Feature | Single-Agent | Multi-Node Planner |
-|---------|--------------|-------------------|
-| **Specialization** | One broad prompt | 5 focused expert prompts |
-| **Validation** | Post-code review | Pre-code quality gates |
-| **Refinement** | Code-level loops | Plan-level feedback |
-| **Debugging** | Monolithic | Phase-level visibility |
-| **Extensibility** | Hard to modify | Modular node injection |
-| **Quality** | 5-7/10 | 8-10/10 expected |
+1. **Intent Analysis**: Extracts the core problem and success metrics.
+2. **Requirements Engineering**: Defines functional/non-functional requirements & edge cases.
+3. **Architecture Design**: Designs components, patterns, and data structures.
+4. **Implementation Planning**: Creates atomic, step-by-step coding instructions.
+5. **Quality Review**: Validates the plan against strict criteria.
+6. **Consolidation**: Assembles the final approved plan.
 
----
+## State Management
 
-## 🚀 Usage
+The `AgentState` (TypedDict) tracks the plan's evolution through the pipeline:
 
-### Simple Usage:
 ```python
-from src.core.multi_agent.agents.planner.agent import plan_task
+# INPUT
+task_id: str                          # Unique identifier
+user_request: str                     # Original user prompt
+model: str                            # LLM model in use
+show_node_info: bool                  # Verbose output flag
 
-# Create a plan
-plan = plan_task(
-    user_request="Create a function that validates email addresses",
-    model="llama3.1:70b",
+# PHASES
+intent_analysis: Dict                 # Output of Phase 1
+requirements: Dict                    # Output of Phase 2
+architecture: Dict                    # Output of Phase 3
+implementation_plan: Dict             # Output of Phase 4
+quality_review: Dict                  # Output of Phase 5
+
+# FINAL OUTPUT
+final_plan: Dict                      # Consolidated output
+plan_approved: bool                   # Whether plan met quality standards
+
+# METADATA
+iteration_count: int                  # Rejection counter
+errors: List[str]                     # Error log
+```
+
+## Node Descriptions
+
+### Phase 1: Intent Analyzer
+**File:** `nodes/intent_analyzer.py`
+
+**Responsibility:** Distill the user's request into a structured problem definition.
+
+**Output:**
+- `intent`: Core problem statement
+- `task_type`: Classification (e.g., algorithm, API, utility)
+- `success_metrics`: Measurable goals
+- `assumptions`: Implicit context made explicit
+
+**Why it matters:** Prevents "XY Problems" by focusing on the underlying need rather than just the surface request.
+
+---
+
+### Phase 2: Requirements Engineer
+**File:** `nodes/requirements_engineer.py`
+
+**Responsibility:** Transform intent into testable specifications.
+
+**Output:**
+- `functional`: List of required behaviors
+- `non_functional`: Performance, security, and reliability constraints
+- `edge_cases`: Boundary conditions (empty inputs, large data, etc.)
+
+**Why it matters:** Ensures the solution is robust and production-ready, not just a "happy path" prototype.
+
+---
+
+### Phase 3: Architecture Designer
+**File:** `nodes/architecture_designer.py`
+
+**Responsibility:** Design the technical blueprint.
+
+**Output:**
+- `components`: Single-responsibility modules
+- `design_patterns`: Justified pattern selection
+- `data_structures`: Optimal choices with complexity analysis (O(n))
+- `exception_hierarchy`: Error handling strategy
+
+**Why it matters:** Prevents spaghetti code by enforcing structure and separation of concerns before a single line is written.
+
+---
+
+### Phase 4: Implementation Planner
+**File:** `nodes/implementation_planner.py`
+
+**Responsibility:** Create a step-by-step guide for the Coder Agent.
+
+**Output:**
+- `implementation_order`: Dependency-aware sequence
+- `steps`: Atomic actions for each component
+- `validation`: Exact checks to implement
+- `code_guidance`: Specific hints for complex logic
+
+**Why it matters:** Reduces hallucination by giving the Coder Agent a strict recipe to follow.
+
+---
+
+### Phase 5: Quality Reviewer
+**File:** `nodes/quality_reviewer.py`
+
+**Responsibility:** Act as a gatekeeper for plan quality.
+
+**Review Criteria:**
+- **Completeness:** Are all requirements met?
+- **Clarity:** Is it unambiguous?
+- **Feasibility:** Is it implementable?
+
+**Output:**
+- `completeness_score`: 0-10 rating
+- `approval_status`: `approved` or `needs_revision`
+- `issues`: List of specific problems to fix
+
+**Why it matters:** Ensures only high-quality plans reach the coding stage, saving compute and protecting code quality.
+
+## Error Handling
+
+Errors are tracked in `state["errors"]` and fail gracefully:
+
+1.  **Refinement Limit**: The agent will retry up to 2 times if the Quality Reviewer rejects the plan. After that, it proceeds with a "best effort" plan to avoid infinite loops.
+2.  **Phase Failures**: If a specific phase (e.g., Architecture) fails to generate valid JSON, the pipeline logs the error and attempts to continue or fail fast depending on severity.
+3.  **Validation Gates**: The `should_refine` conditional edge ensures that we don't pass garbage to the consolidation phase unless we've exhausted our options.
+
+## Usage
+
+### Basic Usage
+
+```python
+from src.core.multi_agent.agents.planner import PlannerAgent
+
+# Initialize
+agent = PlannerAgent(model="deepseek")
+
+# Run
+plan = agent.create_plan(
+    task_id="task_123",
+    user_request="Create a thread-safe LRU cache with time-based expiration",
     verbose=True
 )
 
-# Check if approved
-if plan["approved"]:
-    print("Plan ready for coder!")
-    print(f"Components: {len(plan['architecture']['components'])}")
+# Check result
+if plan.get("approved"):
+    print(f"Plan approved! Score: {plan['quality_review']['completeness_score']}/10")
+    print(f"Architecture: {len(plan['architecture']['components'])} components")
+else:
+    print("Plan generated (Best Effort)")
 ```
 
-### Advanced Usage:
-```python
-from src.core.multi_agent.agents.planner.agent import PlannerAgent
+## Integration
 
-# Initialize planner
-planner = PlannerAgent(model="llama3.1:70b")
-
-# Create plan
-plan = planner.create_plan(
-    task_id="task_001",
-    user_request="Implement binary search with edge case handling",
-    verbose=True
-)
-
-# Get summary
-summary = planner.get_plan_summary(plan)
-print(summary)
-
-# Export to JSON
-planner.export_plan_json(plan, "plan_task_001.json")
-```
-
----
-
-## 📋 System Prompts Overview
-
-### 1. **Intent Analyzer** (Node 1)
-- **Role**: Requirements analyst
-- **Output**: Intent, task type, domain, success metrics, assumptions
-
-### 2. **Requirements Engineer** (Node 2)
-- **Role**: Systems analyst
-- **Output**: Functional/non-functional requirements, constraints, edge cases
-
-### 3. **Architecture Designer** (Node 3)
-- **Role**: Principal architect
-- **Output**: Components, design patterns, data structures, algorithms
-
-
-### 4. **Implementation Planner** (Node 4)
-- **Role**: Senior developer
-- **Output**: Step-by-step instructions, validation rules, test cases
-
-### 5. **Code Quality Reviewer** (Node 5)
-- **Role**: Code reviewer
-- **Output**: Completeness score, issues, improvements, approval status
-
-
-### 6. **Consolidation** (Node 6)
-- **Purpose**: Assemble final unified plan
-- **Output**: Complete JSON plan for coder agent
-
----
-
-## 🔄 Refinement Loop Logic
-
-```python
-def should_refine(state):
-    if plan_approved:
-        return "consolidation"  # ✅ Proceed to final
-    
-    if iteration_count < 2:
-        return "architecture_design"  # 🔄 Retry architecture
-    
-    return "consolidation"  # ⚠️ Best-effort output
-```
-
----
-
-## 🎯 Architectural Decisions
-
-### **Why Multi-Node?**
-1. **Higher Specialization**: Each node has ONE focused job
-2. **Progressive Validation**: Catch issues early
-3. **Better Debugging**: Inspect individual phases
-4. **Modular Evolution**: Easy to modify/extend
-
-### **Why This Flow?**
-1. **Intent → Requirements**: Foundation must be solid
-2. **Requirements → Architecture**: Design from specs
-3. **Architecture → Implementation**: Blueprint to instructions
-4. **Implementation → Quality**: Validate before coding
-5. **Quality → Refinement/Final**: Gate with feedback
-
-### **Why JSON Output?**
-- Consistent structure
-- Easy parsing for coder agent
-- Type-safe consumption
-- Clear contracts between nodes
-
----
-
-## 🚀 Integration
-
-### **1. Connect to Coder Agent:**
-```python
-# In multi_agent/pipeline.py
-from planner.agent import PlannerAgent
-from coder.agent import CoderAgent
-
-planner = PlannerAgent()
-coder = CoderAgent()
-
-# Create plan
-plan = planner.create_plan(task_id, user_request)
-
-# Pass to coder
-code = coder.generate_from_plan(plan)
-```
-
-### **2. Add Critic Agent:**
-```python
-# After planner, before coder
-plan = planner.create_plan(...)
-critique = critic.review_plan(plan)
-if not critique["approved"]:
-    plan = planner.refine_with_feedback(critique)
-code = coder.generate_from_plan(plan)
-```
-
-### **3. Integrate Quality Metrics:**
-```python
-# Track plan quality over time
-from evaluation.quality_metrics import track_plan_quality
-
-metrics = track_plan_quality(plan)
-# Store metrics for analysis
-```
-
----
-
-## 📈 Future Enhancements
-
-1. **Multi-Model Ensemble**: Use different models per phase
-2. **Human-in-the-Loop**: Add approval breakpoints
-3. **Plan Caching**: Reuse similar plans
-4. **Dynamic Phases**: Skip/add phases based on task type
-5. **Metrics Dashboard**: Track quality, latency, approval rates
-
----
+The Planner Agent is the **Brain** of the pipeline. It feeds the **Coder Agent** (the Hands), which executes the plan. The high-fidelity plan serves as the context window for code generation, drastically reducing the chance of errors.

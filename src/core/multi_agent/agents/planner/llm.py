@@ -1,13 +1,9 @@
 """
 llm.py
 
-SOTA LLM prompts for multi-node planner agent.
-Hybrid approach: Common base + node-specific specialization.
-Optimized for Mistral 7B with chain-of-thought reasoning.
+Prompts and helpers for the Planner Agent.
 """
 
-import ollama
-import time
 import json
 import re
 from typing import Dict, Any
@@ -15,100 +11,140 @@ from src.utils.config import config
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# MODEL-SPECIFIC PROFILES
+# UTILITIES
 # ═══════════════════════════════════════════════════════════════════════
 
-
-def get_model_profile(model: str) -> Dict[str, Any]:
+def extract_and_parse_json(response: str, max_attempts: int = 3) -> Dict[Any, Any]:
     """
-    Get optimized settings based on model size.
-    Automatically adapts to 7B, 13B, 70B+ models.
-
-    Args:
-        model: Model identifier (e.g., "mistral:7b", "llama3.1:70b")
-
-    Returns:
-        Dict with optimal settings for that model class
+    Extract and parse JSON from LLM response with automatic repair.
     """
-    model_lower = model.lower()
+    # Combined Approach: Robust brace counting + Regex Fallback + Unescaped Newline Handling
+    
+    candidates = []
+    
+    # 1. First priority: Extract from <output> tags if present
+    output_match = re.search(r"<output>\s*(.+?)\s*</output>", response, re.DOTALL)
+    if output_match:
+        candidates.append(output_match.group(1).strip())
+    
+    # 2. Clean thinking blocks for subsequent parsing
+    clean_text = re.sub(r"<thinking>.*?</thinking>", "", response, flags=re.DOTALL).strip()
+    
+    # 3. Heuristic: Brace Counting
+    # Find all top-level {} blocks in the cleaned text, or original text if clean failed
+    target_text = clean_text if clean_text else response
+    
+    brace_count = 0
+    start_index = -1
+    in_string = False
+    escape = False
+    
+    for i, char in enumerate(target_text):
+        if char == '"' and not escape:
+            in_string = not in_string
+        elif char == '\\' and in_string:
+            escape = not escape
+        elif not in_string:
+            if char == '{':
+                if brace_count == 0:
+                    start_index = i
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if brace_count == 0 and start_index != -1:
+                    candidates.append(target_text[start_index : i + 1])
+                    start_index = -1
+        
+        if char != '\\':
+            escape = False
+    
+    # 4. Add code block candidates as fallback
+    code_match = re.search(r"```(?:json)?\s*(.+?)\s*```", response, re.DOTALL)
+    if code_match:
+        candidates.append(code_match.group(1).strip())
+    
+    # 5. Try to find any JSON-like structure after common markers
+    json_markers = [
+        r"(?:Output|Result|Response):\s*(\{.+\})",
+        r"(?:^|\n)(\{[\s\S]*\})\s*(?:$|\n)",  # Standalone JSON block
+    ]
+    for pattern in json_markers:
+        marker_match = re.search(pattern, target_text, re.DOTALL | re.MULTILINE)
+        if marker_match:
+            candidates.append(marker_match.group(1).strip())
+        
+    # Process all candidates (output tag first, then brace-counted, then others)
+    # Remove duplicates while preserving order
+    seen = set()
+    all_candidates = []
+    for c in candidates:
+        if c and c not in seen:
+            all_candidates.append(c)
+            seen.add(c)
+    
+    for json_str in all_candidates:
+        if not json_str: 
+            continue
+            
+        # Clean common issues
+        json_str = json_str.strip()
+        
+        # Remove markdown formatting if present
+        json_str = re.sub(r"^```(?:json)?\s*", "", json_str)
+        json_str = re.sub(r"\s*```$", "", json_str)
+        
+        # Remove trailing commas
+        json_str = re.sub(r",\s*([}\]])", r"\1", json_str)
+        
+        try:
+            return json.loads(json_str, strict=False)
+        except json.JSONDecodeError:
+            # Try fixing unescaped newlines
+            try:
+                fixed_str = json_str.replace('\n', '\\n')
+                return json.loads(fixed_str, strict=False)
+            except json.JSONDecodeError:
+                # Try with more aggressive cleaning
+                try:
+                    # Remove comments
+                    cleaned = re.sub(r'//.*?$', '', json_str, flags=re.MULTILINE)
+                    cleaned = re.sub(r'/\*.*?\*/', '', cleaned, flags=re.DOTALL)
+                    return json.loads(cleaned, strict=False)
+                except json.JSONDecodeError:
+                    continue
 
-    # Detect model size
-    if any(size in model_lower for size in ["7b", "8b"]) or model_lower in [
-        "mistral",
-        "mistral:latest",
-    ]:
-        # Small models (7B-8B) - Mistral 7B optimization
-        # Note: 'mistral' defaults to 7B variant
-        return {
-            "max_tokens": {
-                "intent": 768,
-                "requirements": 1024,
-                "architecture": 1536,
-                "implementation": 1536,
-                "quality": 1024,
-            },
-            "temperature": {
-                "intent": 0.2,
-                "requirements": 0.2,
-                "architecture": 0.35,  # Lower than before for 7B stability
-                "implementation": 0.25,
-                "quality": 0.3,
-            },
-            "top_k": 40,
-            "repeat_penalty": 1.15,
-            "compress_context": True,  # CRITICAL for 7B
-            "use_examples": True,
-        }
-    elif any(size in model_lower for size in ["13b", "14b"]):
-        # Medium models
-        return {
-            "max_tokens": {
-                "intent": 1024,
-                "requirements": 1536,
-                "architecture": 2048,
-                "implementation": 2048,
-                "quality": 1536,
-            },
-            "temperature": {
-                "intent": 0.2,
-                "requirements": 0.2,
-                "architecture": 0.4,
-                "implementation": 0.3,
-                "quality": 0.3,
-            },
-            "top_k": 50,
-            "repeat_penalty": 1.12,
-            "compress_context": True,
-            "use_examples": True,
-        }
+    # Final Attempt: The whole response (after cleaning thinking tags)
+    try:
+        return json.loads(clean_text.strip(), strict=False)
+    except json.JSONDecodeError:
+        pass
+    
+    # Last resort: Try to extract anything that looks like JSON from the raw response
+    # Look for largest {...} block even if malformed
+    all_braces = re.findall(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', response, re.DOTALL)
+    for attempt in all_braces:
+        try:
+            cleaned = re.sub(r',\s*([}\]])', r'\1', attempt)
+            return json.loads(cleaned, strict=False)
+        except json.JSONDecodeError:
+            continue
+
+    # All attempts failed - provide helpful error
+    if '<thinking>' in response and '<output>' not in response:
+        error_msg = "Model produced <thinking> but forgot <output> tags. No JSON found."
     else:
-        # Large models (70B+)
-        return {
-            "max_tokens": {
-                "intent": 1536,
-                "requirements": 2048,
-                "architecture": 3072,
-                "implementation": 3072,
-                "quality": 2048,
-            },
-            "temperature": {
-                "intent": 0.2,
-                "requirements": 0.2,
-                "architecture": 0.4,
-                "implementation": 0.3,
-                "quality": 0.3,
-            },
-            "top_k": 60,
-            "repeat_penalty": 1.1,
-            "compress_context": False,  # Large models handle full context
-            "use_examples": False,  # Don't need examples
-        }
+        error_msg = f"Failed to parse JSON after attempting {len(all_candidates)} extractions."
+    
+    raise json.JSONDecodeError(
+        f"{error_msg} Response preview: {response[:500]}...",
+        response,
+        0,
+    )
 
 
 def compress_phase_output(phase_name: str, phase_data: Dict[str, Any]) -> str:
     """
     Compress phase output to essential information only.
-    Critical for maintaining context window on 7B models.
 
     Args:
         phase_name: Name of the phase
@@ -163,35 +199,30 @@ CORE PRINCIPLES:
 - PRODUCTION MINDSET: Think like a senior engineer shipping to production
 - ACTIONABILITY: Every statement must be implementable
 
-REASONING PROCESS (Chain-of-Thought):
-Use this two-stage thinking process:
+CRITICAL OUTPUT FORMAT (READ THIS CAREFULLY):
+You MUST use this exact two-stage format in EVERY response:
 
-1. INTERNAL REASONING (in <thinking> tags):
-   - Analyze the problem space step-by-step
-   - Consider multiple approaches and trade-offs
-   - Evaluate constraints and edge cases
-   - Think through WHY each decision matters
-   
-2. STRUCTURED OUTPUT (in <output> tags):
-   - Format your final answer as valid JSON
-   - Follow the exact schema provided
-   - Be precise and actionable
+1. REASONING (in <thinking> tags):
+   Think through the problem step by step.
 
-RESPONSE FORMAT:
+2. JSON OUTPUT (in <output> tags):
+   Your final answer as valid JSON.
+
+EXAMPLE OF REQUIRED FORMAT:
 <thinking>
-Your step-by-step reasoning here...
-- What is the core problem?
-- What approaches could work?
-- What are the trade-offs?
-- What edge cases exist?
+Let me think about this step by step...
+- First consideration
+- Second consideration
 </thinking>
 
 <output>
-{
-  "your": "json",
-  "response": "here"
-}
+{{
+  "key": "value",
+  "another_key": ["list", "items"]
+}}
 </output>
+
+FAILURE TO USE BOTH TAGS WILL CAUSE PARSING ERRORS!
 
 JSON OUTPUT REQUIREMENTS (CRITICAL):
 Inside <output> tags, provide ONLY valid JSON:
@@ -224,6 +255,8 @@ INTENT_ANALYZER_SPECIFIC = """
 YOUR ROLE: Expert requirements analyst specializing in intent extraction.
 
 YOUR TASK: Deeply understand the user's request and extract the true problem being solved.
+
+CRITICAL: You MUST wrap your JSON output in <output></output> tags. Do NOT output raw JSON without these tags.
 
 ANALYSIS CHECKLIST:
 1. CORE INTENT: What is the real problem?
@@ -282,6 +315,8 @@ REQUIREMENTS_ENGINEER_SPECIFIC = """
 YOUR ROLE: Elite requirements engineer for production systems.
 
 YOUR TASK: Transform intent into comprehensive, testable requirements.
+
+CRITICAL: You MUST wrap your JSON output in <output></output> tags. Do NOT output raw JSON without these tags.
 
 REQUIREMENTS CHECKLIST:
 1. FUNCTIONAL REQUIREMENTS: What must the code do?
@@ -390,6 +425,8 @@ YOUR ROLE: Principal software architect specializing in clean, scalable design.
 
 YOUR TASK: Design the optimal architecture that satisfies all requirements.
 
+CRITICAL: You MUST wrap your JSON output in <output></output> tags. Do NOT output raw JSON without these tags.
+
 DESIGN CHECKLIST:
 1. DECOMPOSITION: Break into single-responsibility components
 2. DESIGN PATTERNS: Select appropriate patterns with justification
@@ -469,6 +506,8 @@ IMPLEMENTATION_PLANNER_SPECIFIC = """
 YOUR ROLE: Senior developer creating implementation blueprints.
 
 YOUR TASK: Transform architecture into step-by-step implementation instructions.
+
+CRITICAL: You MUST wrap your JSON output in <output></output> tags. Do NOT output raw JSON without these tags.
 
 PLANNING CHECKLIST:
 1. IMPLEMENTATION ORDER: Sequence components based on dependencies
@@ -597,6 +636,8 @@ YOUR ROLE: Senior planning architect reviewing plan quality before handoff to co
 
 YOUR TASK: Validate that this plan is comprehensive enough for a developer agent to implement production-grade code without questions.
 
+CRITICAL: You MUST wrap your JSON output in <output></output> tags. Do NOT output raw JSON without these tags.
+
 PLAN REVIEW CHECKLIST:
 1. COMPLETENESS (Score 0-10): Does the plan address all functional and non-functional requirements?
 2. CLARITY: Can a coder agent implement from this plan without ambiguity?
@@ -604,9 +645,12 @@ PLAN REVIEW CHECKLIST:
 4. FEASIBILITY: Are architectural decisions and complexity targets realistic?
 5. READINESS: Is this plan ready for handoff to the coder agent?
 
-APPROVAL CRITERIA:
-- Score >= 8 AND all critical issues resolved: APPROVED (ready for coder agent)
-- Score < 8 OR critical issues remain: NEEDS_REVISION (send back to architecture phase)
+APPROVAL CRITERIA (Be Pragmatic):
+- Score >= 6 AND no CRITICAL blockers: APPROVED (ready for coder agent)
+- Score < 6 OR critical blockers exist: NEEDS_REVISION
+
+CRITICAL means: missing core requirements, fundamentally flawed design, or completely unclear steps.
+Minor issues are OK - the coder agent is capable.
 
 YOUR OUTPUT SCHEMA:
 {
@@ -642,169 +686,3 @@ Remember: You are reviewing the PLAN, not code. The coder agent will generate co
 """
 
 PLAN_QUALITY_REVIEWER_PROMPT = BASE_SYSTEM_PROMPT + PLAN_QUALITY_REVIEWER_SPECIFIC
-
-
-# ═══════════════════════════════════════════════════════════════════════
-# JSON REPAIR UTILITY
-# ═══════════════════════════════════════════════════════════════════════
-
-
-def extract_and_parse_json(response: str, max_attempts: int = 3) -> Dict[Any, Any]:
-    """
-    Extract and parse JSON from LLM response with automatic repair.
-
-    Handles common issues:
-    - JSON wrapped in <output> tags (chain-of-thought)
-    - Markdown code blocks
-    - Trailing commas
-    - Missing quotes
-    - Extra text before/after JSON
-
-    Args:
-        response: Raw LLM response
-        max_attempts: Number of repair strategies to try
-
-    Returns:
-        Parsed JSON dict
-
-    Raises:
-        json.JSONDecodeError: If all repair attempts fail
-    """
-    attempts = [
-        # Attempt 1: Extract from <output> tags
-        lambda r: re.search(r"<output>\s*(.+?)\s*</output>", r, re.DOTALL),
-        # Attempt 2: Extract from ```json blocks
-        lambda r: re.search(r"```(?:json)?\s*(.+?)\s*```", r, re.DOTALL),
-        # Attempt 3: Find first { to last }
-        lambda r: re.search(r"\{.+\}", r, re.DOTALL),
-    ]
-
-    for i, extract_func in enumerate(attempts[:max_attempts]):
-        try:
-            # Try to extract JSON
-            match = extract_func(response)
-            if match:
-                json_str = match.group(1) if i < 2 else match.group(0)
-            else:
-                json_str = response  # Use raw response
-
-            # Clean common issues
-            json_str = json_str.strip()
-            # Remove trailing commas before } or ]
-            json_str = re.sub(r",\s*([}\]])", r"\1", json_str)
-
-            # Try to parse
-            return json.loads(json_str)
-
-        except (json.JSONDecodeError, AttributeError):
-            continue
-
-    # All attempts failed
-    raise json.JSONDecodeError(
-        f"Failed to parse JSON after {max_attempts} attempts. Response: {response[:200]}...",
-        response,
-        0,
-    )
-
-
-# ═══════════════════════════════════════════════════════════════════════
-# LLM CALL FUNCTION
-# ═══════════════════════════════════════════════════════════════════════
-
-
-def call_llm(
-    *,
-    user_prompt: str,
-    system_prompt: str,
-    model: str,
-    temperature: float = None,
-    max_tokens: int = None,
-    node_name: str = "default",
-) -> str:
-    """
-    Core LLM call for all planner nodes.
-    Automatically adapts to model size using profiles.
-
-    Args:
-        user_prompt: The specific task/question for this node (DATA ONLY)
-        system_prompt: The node-specific system prompt (INSTRUCTIONS)
-        model: Ollama model identifier
-        temperature: Sampling temperature (None = use profile default)
-        max_tokens: Maximum response tokens (None = use profile default)
-        node_name: Node identifier for profile optimization
-
-    Returns:
-        str: LLM response (typically JSON in <output> tags)
-
-    Raises:
-        RuntimeError: After all retry attempts exhausted
-        ConnectionError: Cannot connect to Ollama
-    """
-    # Get model-specific profile
-    profile = get_model_profile(model)
-
-    # Use profile defaults if not specified
-    if temperature is None:
-        temperature = profile["temperature"].get(node_name, 0.2)
-    if max_tokens is None:
-        max_tokens = profile["max_tokens"].get(node_name, 1536)
-
-    base_delay = 0.5
-    max_delay = 8.0
-    last_exception = None
-
-    for attempt in range(config.max_retries + 1):
-        try:
-            response = ollama.chat(
-                model=model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                options={
-                    "temperature": temperature,
-                    "top_p": 0.9,
-                    "top_k": profile["top_k"],  # Use profile value
-                    "num_predict": max_tokens,
-                    "repeat_penalty": profile["repeat_penalty"],  # Use profile value
-                    "repeat_last_n": 256,
-                    "stop": ["</output>", "\n\n\n\n", "```"],
-                    "num_ctx": 8192,
-                },
-            )
-
-            content = response.get("message", {}).get("content", "")
-            if not content or len(content.strip()) < 10:
-                raise ValueError(f"Empty response (attempt {attempt + 1})")
-
-            return content
-
-        except ollama.ResponseError as e:
-            last_exception = e
-            if attempt == config.max_retries:
-                raise RuntimeError(
-                    f"LLM API error after {config.max_retries + 1} attempts: {str(e)}"
-                ) from e
-
-        except ollama.RequestError as e:
-            last_exception = e
-            if attempt == config.max_retries:
-                raise ConnectionError(
-                    f"Cannot connect to Ollama. Ensure 'ollama serve' is running: {str(e)}"
-                ) from e
-
-        except Exception as e:
-            last_exception = e
-            if attempt == config.max_retries:
-                raise RuntimeError(
-                    f"Unexpected error after {config.max_retries + 1} attempts: {str(e)}"
-                ) from e
-
-        if attempt < config.max_retries:
-            delay = min(base_delay * (2**attempt), max_delay)
-            print(f"⏳ Retry {attempt + 1} in {delay:.1f}s...")
-            time.sleep(delay)
-
-    raise RuntimeError(
-        f"Failed after {config.max_retries + 1} attempts: {str(last_exception)}"
-    )
