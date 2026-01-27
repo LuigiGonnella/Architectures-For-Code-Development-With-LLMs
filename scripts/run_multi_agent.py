@@ -104,7 +104,7 @@ def main():
 
         for attempt in range(args.max_retries + 1):
             iter_msg = (
-                f"Initial Generation"
+                "Initial Generation"
                 if attempt == 0
                 else f"Refinement Iteration {attempt}/{args.max_retries}"
             )

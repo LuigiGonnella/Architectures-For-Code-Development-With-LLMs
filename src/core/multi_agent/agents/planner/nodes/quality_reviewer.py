@@ -98,7 +98,7 @@ Remember: You are reviewing the PLAN (not code). The coder agent generates code 
             approval_status = "approved"
             is_approved = True
             if state.get("show_node_info"):
-                print(f"    Auto-approving (max iterations reached)")
+                print("    Auto-approving (max iterations reached)")
         # Override: auto-approve if score >= 6 and no critical issues
         elif completeness >= 6 and len(critical_issues) == 0:
             approval_status = "approved"

@@ -7,7 +7,6 @@ Prompts and helpers for the Planner Agent.
 import json
 import re
 from typing import Dict, Any
-from src.utils.config import config
 
 
 # ═══════════════════════════════════════════════════════════════════════
