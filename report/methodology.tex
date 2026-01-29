@@ -1,0 +1,196 @@
+% Methodology Section for LLM-for-SE Report
+
+\section{Methodology}
+\label{sec:methodology}
+
+We implement and evaluate three architectures of increasing complexity for LLM-based code generation: a \textit{naive baseline}, a \textit{single-agent pipeline}, and a \textit{multi-agent system}. All approaches use Ollama for local model inference with temperature fixed at 0.0 for deterministic output. Table~\ref{tab:approach-comparison} summarizes the key differences.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Comparison of the three approaches}
+\label{tab:approach-comparison}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+& \textbf{Naive} & \textbf{Single} & \textbf{Multi} \\
+\midrule
+LLM Calls & 1 & 5--8 & 10--20+ \\
+Reasoning Phases & 0 & 5 & 15 total \\
+Feedback Loop & No & Yes & Yes \\
+Agent Identities & 1 & 1 & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%==============================================================================
+\subsection{Naive Baseline}
+\label{subsec:naive}
+
+The naive baseline represents the simplest approach: single-shot code generation with no structured reasoning. The task specification (function signature and docstring) is formatted into a prompt, the LLM generates code, and the output is extracted and executed. There is no analysis, planning, or refinement.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.85\columnwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=1.2cm,
+    box/.style={rectangle, draw=blue!60, rounded corners=3pt, minimum width=1.8cm, minimum height=0.7cm, align=center, fill=blue!8, font=\footnotesize},
+    arrow/.style={-stealth, thick, blue!50}
+]
+    \node[box] (input) {Task};
+    \node[box, right=of input] (llm) {LLM};
+    \node[box, right=of llm] (extract) {Extract};
+    \node[box, right=of extract] (exec) {Execute};
+
+    \draw[arrow] (input) -- (llm);
+    \draw[arrow] (llm) -- (extract);
+    \draw[arrow] (extract) -- (exec);
+\end{tikzpicture}%
+}
+\caption{Naive baseline: single-pass generation}
+\label{fig:naive-arch}
+\end{figure}
+
+This approach serves as a control condition, measuring what the LLM can achieve without architectural support.
+
+%==============================================================================
+\subsection{Single-Agent Pipeline}
+\label{subsec:single-agent}
+
+The single-agent approach introduces structured multi-phase reasoning using LangGraph~\cite{langgraph2024}, while maintaining a unified agent identity. The pipeline consists of five phases with an iterative refinement loop.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.9\columnwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=0.9cm,
+    phase/.style={rectangle, draw=green!60!black, rounded corners=3pt, minimum width=1.4cm, minimum height=0.65cm, align=center, fill=green!10, font=\footnotesize},
+    arrow/.style={-stealth, thick, green!50!black}
+]
+    \node[phase] (analysis) {Analyze};
+    \node[phase, right=of analysis] (plan) {Plan};
+    \node[phase, right=of plan] (gen) {Generate};
+    \node[phase, right=of gen] (review) {Review};
+    \node[phase, below=0.6cm of review] (refine) {Refine};
+
+    \draw[arrow] (analysis) -- (plan);
+    \draw[arrow] (plan) -- (gen);
+    \draw[arrow] (gen) -- (review);
+    \draw[arrow] (review) -- (refine);
+    \draw[arrow, dashed] (refine.west) -- ++(-0.4,0) |- (gen.south);
+\end{tikzpicture}%
+}
+\caption{Single-agent pipeline with refinement loop (max 3 iterations)}
+\label{fig:single-agent-arch}
+\end{figure}
+
+\paragraph{Phase 1: Analysis.}
+Extracts structured understanding from the task specification without proposing solutions: required behavior, input/output types, constraints, edge cases, ambiguities, and common pitfalls. The prompt explicitly forbids code generation.
+
+\paragraph{Phase 2: Planning.}
+Formulates an implementation strategy based on the analysis: algorithmic approach, step-by-step implementation sequence, edge case handling, data structures, and complexity analysis (time and space).
+
+\paragraph{Phase 3: Generation.}
+Synthesizes Python code guided by the accumulated context. The prompt enforces exact signature matching, no explanatory text, and comprehensive edge case handling. A robust parser extracts code from the LLM output.
+
+\paragraph{Phase 4: Review.}
+Evaluates the generated code through execution in an isolated namespace and static analysis via Radon~\cite{radon2024}. The review distinguishes between correctness issues (which trigger refinement) and quality issues (which do not).
+
+\paragraph{Phase 5: Refinement.}
+When correctness issues are found, generates improved code based on review feedback. The loop terminates when correct or after 3 iterations. Priorities: correctness first, then edge cases, then quality.
+
+%==============================================================================
+\subsection{Multi-Agent System}
+\label{subsec:multi-agent}
+
+The multi-agent approach distributes responsibilities across three specialized agents, each with distinct identity and internal reasoning pipeline.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=0.8cm,
+    agent/.style={rectangle, draw=orange!70!black, rounded corners=3pt, minimum width=1.4cm, minimum height=0.6cm, align=center, fill=orange!12, font=\footnotesize\bfseries},
+    process/.style={rectangle, draw=gray!60, rounded corners=3pt, minimum width=1.2cm, minimum height=0.5cm, align=center, fill=gray!10, font=\scriptsize},
+    arrow/.style={-stealth, thick, orange!60!black},
+    grayarrow/.style={-stealth, thick, gray!60}
+]
+    % Planner phase
+    \node[agent] (planner) {Planner};
+
+    % Coder-Critic loop
+    \node[agent, right=1.2cm of planner] (coder) {Coder};
+    \node[process, right=0.8cm of coder] (exec) {Execute};
+    \node[process, right=0.6cm of exec] (metrics) {Metrics};
+    \node[agent, right=0.8cm of metrics] (critic) {Critic};
+
+    % Arrows
+    \draw[arrow] (planner) -- node[above, font=\scriptsize] {plan} (coder);
+    \draw[grayarrow] (coder) -- node[above, font=\scriptsize] {code} (exec);
+    \draw[grayarrow] (exec) -- (metrics);
+    \draw[grayarrow] (metrics) -- (critic);
+    \draw[arrow, dashed] (critic.south) -- ++(0,-0.5) -| node[below, pos=0.2, font=\scriptsize] {feedback} (coder.south);
+\end{tikzpicture}%
+}
+\caption{Multi-agent orchestration: Planner runs once, then Coder-Critic loop iterates until correct or max iterations}
+\label{fig:multi-agent-arch}
+\end{figure}
+
+\subsubsection{Planner Agent}
+
+The Planner serves as the system's architect, transforming task descriptions into comprehensive implementation blueprints through five internal phases:
+
+\begin{enumerate}
+    \item \textbf{Intent Analysis}: Extracts core problem, task classification, domain, and success metrics.
+    \item \textbf{Requirements Engineering}: Defines functional/non-functional requirements and enumerates edge cases.
+    \item \textbf{Architecture Design}: Designs components, selects patterns, chooses data structures with complexity analysis.
+    \item \textbf{Implementation Planning}: Creates step-by-step coding instructions with validation checks.
+    \item \textbf{Quality Review}: Scores plan completeness (0--10); threshold $\geq$8 required to proceed.
+\end{enumerate}
+
+If the quality score is below threshold, the Planner iterates on specific phases (up to 2 retries).
+
+\subsubsection{Coder Agent}
+
+The Coder transforms plans into executable code through six internal phases:
+
+\begin{enumerate}
+    \item \textbf{Input Validation}: Verifies signature syntax and plan completeness.
+    \item \textbf{Edge Case Analysis}: Identifies type-specific boundaries (numeric, collection, string).
+    \item \textbf{Chain-of-Thought}: Generates structured reasoning before implementation.
+    \item \textbf{Code Generation}: Produces code with full accumulated context.
+    \item \textbf{Code Validation}: Checks syntax via AST parsing and detects logic issues.
+    \item \textbf{Code Optimization}: Improves naming, efficiency, and style.
+\end{enumerate}
+
+\subsubsection{Critic Agent}
+
+The Critic provides rigorous review through four internal phases:
+
+\begin{enumerate}
+    \item \textbf{Input Validation}: Ensures code, plan, and signature are present.
+    \item \textbf{Correctness Analysis}: Verifies logic, interprets execution errors, checks constraints.
+    \item \textbf{Quality Review}: Assesses complexity, maintainability, and style.
+    \item \textbf{Feedback Synthesis}: Produces actionable instructions, prioritizing correctness over quality.
+\end{enumerate}
+
+\subsubsection{Orchestration}
+
+The master workflow coordinates the agents: (1) Planner creates the implementation plan; (2) Coder generates code; (3) code is executed and metrics computed; (4) Critic reviews and provides feedback; (5) if issues found, Coder refines with feedback. The loop continues until correct or maximum iterations reached.
+
+%==============================================================================
+\subsection{Shared Infrastructure}
+\label{subsec:infrastructure}
+
+All three approaches share common components ensuring fair comparison:
+
+\begin{itemize}
+    \item \textbf{LLM Runtime}: Ollama interface with 8192-token context, 4096-token output limit, and automatic retry with backoff.
+    \item \textbf{Code Extraction}: Parser handling markdown blocks (\verb|```python|), generic blocks, and raw functions; validates syntax via AST.
+    \item \textbf{Execution}: Isolated namespace with captured stdout/stderr, exception handling, and function extraction verification.
+    \item \textbf{Quality Metrics}: Radon-based static analysis computing Maintainability Index (0--100), Cyclomatic Complexity, LOC, and Halstead metrics.
+\end{itemize}
+
+\subsection{Model Configuration}
+\label{subsec:models}
+
+Experiments use locally-hosted models via Ollama. For naive and single-agent approaches: \texttt{qwen2.5-coder:7b-instruct}. For multi-agent: \texttt{qwen2.5-coder:7b-instruct} for Planner and Coder, \texttt{deepseek-coder-v2:16b} for Critic. Using a larger model for the Critic provides independent validation from a stronger reviewer, catching issues the generation model might miss.
