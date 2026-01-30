@@ -51,7 +51,7 @@
 \maketitle
 
 \begin{abstract}
-Large language models (LLMs) demonstrate impressive code generation capabilities, yet single-prompt interactions often fail on complex development tasks. We investigate whether multi-agent architectures improve code quality through role specialization and iterative refinement. We compare three approaches---Naive (one-shot generation), Single-Agent (5-stage pipeline with self-refinement), and Multi-Agent (Planner-Coder-Critic coordination)---across 25 programming tasks spanning five domains and three difficulty levels. Surprisingly, Multi-Agent and Naive achieve identical overall correctness (77.6\%), outperforming Single-Agent (74.6\%). However, Multi-Agent excels in algorithmically demanding domains (DSA: 85.9\%, Logic: 75.7\%) and medium-difficulty tasks (91.8\%), justifying its 20$\times$ computational overhead only for specific task types. Our findings reveal that architectural sophistication benefits complex algorithmic reasoning but can hurt performance on simple tasks through over-refinement.
+  Large language models (LLMs) demonstrate impressive code generation capabilities, yet single-prompt interactions often fail on complex development tasks. We investigate whether multi-agent architectures improve code quality through role specialization and iterative refinement. We compare three approaches---Naive (one-shot generation), Single-Agent (5-stage pipeline with self-refinement), and Multi-Agent (Planner-Coder-Critic coordination)---across 25 programming tasks spanning five domains and three difficulty levels. Surprisingly, Multi-Agent and Naive achieve identical overall correctness (77.6\%), outperforming Single-Agent (74.6\%). However, Multi-Agent excels in algorithmically demanding domains (DSA: 85.9\%, Logic: 75.7\%) and medium-difficulty tasks (91.8\%), justifying its 20$\times$ computational overhead only for specific task types. Our findings reveal that architectural sophistication benefits complex algorithmic reasoning but can hurt performance on simple tasks through over-refinement.
 \end{abstract}
 
 \section{Introduction}
@@ -68,9 +68,9 @@ Large language models (LLMs) demonstrate impressive code generation capabilities
 We address the following research questions from the assignment requirements:
 
 \begin{enumerate}
-    \item \textbf{RQ1:} Which architectures produce higher-quality and more maintainable code?
-    \item \textbf{RQ2:} How do agent coordination strategies impact correctness?
-    \item \textbf{RQ3:} Does modular role separation improve code generation?
+  \item \textbf{RQ1:} How do the architectures compare in terms of functional correctness and code quality?
+  \item \textbf{RQ2:} How do agent coordination strategies impact correctness?
+  \item \textbf{RQ3:} Does modular role separation improve code generation?
 \end{enumerate}
 
 \section{Background}
@@ -87,48 +87,10 @@ We address the following research questions from the assignment requirements:
 % methodology section (imported from external file)
 \input{methodology}
 
-% --- Original System Overview ---
-%\section{System Overview}
-%
-%We implement three architectures with increasing sophistication: Naive (baseline), Single-Agent (self-refinement), and Multi-Agent (role specialization with coordination). All systems use LangGraph~\citep{langgraph2024} for state management and conditional execution.
-%
-%\subsection{Naive Baseline}
-%
-%The Naive approach makes a single LLM call with the task specification (function signature and docstring). It generates code directly without intermediate reasoning, planning, or refinement. This serves as a minimal baseline to measure the value added by architectural complexity.
-%
-%\subsection{Single-Agent Architecture}
-%
-%The Single-Agent system implements a 5-stage pipeline:
-%
-%\begin{enumerate}
-%    \item \textbf{Analysis:} Extract requirements, constraints, and edge cases from the task specification.
-%    \item \textbf{Planning:} Design a solution strategy with algorithmic approach and data structures.
-%    \item \textbf{Generation:} Produce code implementing the planned solution.
-%    \item \textbf{Review:} Execute code, compute quality metrics (Maintainability Index, Cyclomatic Complexity), and perform self-critique.
-%    \item \textbf{Refinement:} Iteratively improve code based on review feedback (up to 3 iterations).
-%\end{enumerate}
-%
-%The agent uses execution results and quality metrics to guide refinement, terminating when tests pass or maximum iterations are reached.
-%
-%\subsection{Multi-Agent Architecture}
-%
-%The Multi-Agent system employs three specialized agents with distinct responsibilities:
-%
-%\textbf{Planner Agent (5 phases):} Creates comprehensive implementation plans through: (1) Intent Analysis---extract core problem and success metrics; (2) Requirements Engineering---define functional/non-functional requirements and edge cases; (3) Architecture Design---design components, patterns, and data structures; (4) Implementation Planning---create step-by-step coding instructions; (5) Quality Review---validate plan completeness (internal refinement loop, max 2 retries).
-%
-%\textbf{Coder Agent (6 phases):} Generates code from plans through: (1) Input Validation; (2) Edge Case Analysis; (3) Chain-of-Thought Generation---structured reasoning before coding; (4) Code Generation; (5) Code Validation---syntax and logic checks; (6) Code Optimization---improve readability and efficiency.
-%
-%\textbf{Critic Agent (4 phases):} Provides independent review through: (1) Input Validation; (2) Correctness Analysis---verify logic and test results; (3) Quality Review---assess maintainability and complexity; (4) Feedback Synthesis---generate actionable improvement suggestions.
-%
-%The system allows up to 2 iterations between Coder and Critic, terminating when all tests pass or maximum iterations are reached. We use Qwen2.5-Coder-7B for Planner and Coder, and DeepSeek-Coder-v2-16B for Critic to provide independent validation from a distinct model perspective.
-%
-%\subsection{Shared Components}
-%
-%All architectures share: (1) LLM interface (temperature: 0.7, max tokens: 2048); (2) Code execution sandbox with 10-second timeouts; (3) Quality metrics computation (MI, CC) using Radon~\citep{radon2024}; (4) Test harness for functional correctness evaluation.
-% --- End of commented out section ---
-
+% experiments section (imported from external file)
 \input{experiments}
 
+% conclusion section (imported from external file)
 \input{conclusion}
 
 \bibliography{custom}
