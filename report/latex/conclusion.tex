@@ -1,14 +1,16 @@
+\section{Discussion}
+Our results highlight a trade-off between \emph{agentic structure} and \emph{raw efficiency}. While the Naive and Multi-Agent settings reach the same aggregate functional correctness (77.6\%), they do so with different operating regimes. Multi-Agent orchestration yields the clearest gains on reasoning-intensive tasks (Logic +10.8pp, DSA +9.4pp), suggesting that explicit decomposition and critique are most beneficial when problems require multi-step constraint satisfaction rather than surface pattern matching.
+
+Conversely, for simpler tasks, additional coordination and repeated LLM calls introduce overhead and opportunities for error accumulation, which can reduce accuracy relative to the Naive baseline. This finding is particularly relevant under \emph{low-compute} and latency-constrained settings, where increased inference budgets may be impractical despite potential quality benefits \citep{strubell2019energy,bommasani2021opportunities}.
+
+\section{Limitations}
+\textbf{Scale and representativeness.} Our evaluation spans 25 tasks and three model families; while sufficient for a controlled comparison, it limits statistical power and the generalizability of domain-specific conclusions.
+
+\textbf{Compute realism.} Multi-agent pipelines can be substantially more expensive than single-pass generation, which may hinder adoption in realistic deployment contexts (e.g., on-device or small-server inference, or strict budget/latency constraints).
+
+\textbf{Operational constraints.} We do not model several practical challenges of production code generation systems, including prompt/plan drift across iterations, brittle structured-output parsing, evolving dependency ecosystems, and the need for robust failure-handling and monitoring in long-running agentic workflows.
+
+\textbf{Future work.} To address these limitations and improve practical usability, we propose: (i) larger-scale benchmarking on established suites (e.g., APPS, CodeContests) with stratified analysis by task type and difficulty; (ii) compute-aware evaluation reporting latency and token cost alongside correctness, and exploring early-exit/anytime stopping criteria; (iii) adaptive routing that selects Naive/Single-/Multi-Agent policies per task using lightweight predictors; (iv) heterogeneous agent configurations (e.g., smaller models for intent/requirements and larger models for architecture) to better balance cost and quality; and (v) robustness improvements, including resilient JSON extraction, explicit error taxonomies, and ablations isolating which planning/review nodes contribute most.
+
 \section{Conclusion}
-We presented a systematic comparison of three architectural approaches for LLM-based code generation, across 25 programming tasks.
-
-The Naive and Multi-Agent architectures achieved identical overall functional correctness (77.6\%), yet their performance profiles differ substantially.
-The Multi-Agent system justifies its computational costs in reasoning-intensive domains (Logic +10.8pp, DSA +9.4pp) where systematic planning yields a clear advantage.
-In contrast, for simple pattern-matching, agentic coordination introduces unnecessary overhead that degrades performance compared to the Naive baseline. \\
-Although Naive unexpectedly outperforms on Hard tasks, likely avoiding the over-refinement pitfalls of complex pipelines, our code quality analysis reveals that the Multi-Agent
-approach produces more modular solutions, preserving maintainability despite increased solution complexity.
-
-These findings suggest adaptive architecture selection: Naive for rapid prototyping, string manipulation, and known hard problems; Single-Agent for general-purpose development with
-systematic edge case checking; Multi-Agent for algorithmic reasoning, constraint satisfaction, and production-quality requirements in complex domains. \\
-
-\textbf{Limitations}: Our study is limited to 25 tasks and three model families. Future work should evaluate on larger benchmarks (APPS, CodeContests), investigate optimal refinement iteration counts,
-explore heterogeneous multi-agent configurations, and develop adaptive routing mechanisms to select architectures based on task characteristics.
+Overall, our findings support \emph{adaptive architecture selection}: Naive for rapid prototyping and pattern-heavy tasks; Single-Agent pipelines for general-purpose development with systematic edge-case checking; and Multi-Agent systems for algorithmic reasoning and specification-heavy problems where planning and critique justify their higher compute cost. We view compute-efficiency and deployment robustness as first-class objectives for future agentic code-generation research.
