@@ -47,13 +47,13 @@
   Politecnico di Torino \\
   \small\texttt{riccardo.marconi@studenti.polito.it}
   \And
-  Name Surname \\
+  Dorotea Monaco \\
   Politecnico di Torino \\
-  \small\texttt{email@studenti.polito.it}
+  \small\texttt{s349653@studenti.polito.it}
   \And
-  Name Surname \\
+  Luigi Gonnella \\
   Politecnico di Torino \\
-  \small\texttt{email@studenti.polito.it}
+  \small\texttt{s341988@studenti.polito.it}
   \AND
   Name Surname \\
   Politecnico di Torino \\
@@ -73,12 +73,11 @@
 
 \section{Introduction}
 
-% TODO: Write introduction section
-\textit{Large language models have revolutionized automated code generation, with models like Codex~\citep{chen2021evaluating} and Code Llama~\citep{roziere2023code} demonstrating remarkable capabilities. However, single-prompt approaches often struggle with complex development tasks requiring multi-step reasoning, systematic debugging, and quality assurance.}
+Large language models have revolutionized automated code generation, with models like Codex~\citep{chen2021evaluating} and Code Llama~\citep{roziere2023code} demonstrating remarkable capabilities on programming benchmarks. However, single-prompt approaches often struggle with complex development tasks that require multi-step reasoning, systematic debugging, and quality assurance. Real-world software development involves iterative refinement cycles---planning, implementation, testing, and revision---that single interactions cannot capture.
 
-\textit{Recent work in multi-agent systems~\citep{hong2023metagpt, qian2023chatdev} suggests that distributing responsibilities across specialized agents (e.g., planning, coding, reviewing) may improve software development outcomes. Yet, no systematic evaluation exists comparing single-agent and multi-agent architectures for code generation across diverse task types and complexity levels.}
+Recent work in multi-agent systems~\citep{hong2023metagpt, qian2023chatdev} suggests that distributing responsibilities across specialized agents (e.g., planning, coding, reviewing) may improve software development outcomes by mimicking human team workflows. Yet, a fundamental question remains unanswered: does the computational overhead of multi-agent coordination consistently translate to higher code quality? No systematic evaluation exists comparing single-agent and multi-agent architectures for code generation across diverse task types and complexity levels, making it unclear when architectural sophistication is justified.
 
-\textit{This work addresses this gap through a controlled comparison of three architectural approaches on 25 programming tasks. Our key finding is that architectural sophistication does not uniformly improve performance---benefits are highly task-dependent, with multi-agent coordination excelling on algorithmic reasoning but struggling on simple pattern-matching tasks.}
+This work addresses this gap through a controlled empirical study comparing three architectural approaches across 25 programming tasks spanning five domains (data structures, logic, mathematics, string processing, list manipulation) and three difficulty levels. We evaluate a Naive baseline (one-shot generation), a Single-Agent pipeline with five iterative refinement stages, and a Multi-Agent system with role-specialized coordination (Planner-Coder-Critic). Our findings challenge the assumption that architectural sophistication uniformly improves performance, revealing that the benefits of multi-agent coordination are highly task-dependent and come at significant computational cost.
 
 \subsection{Research Questions}
 
@@ -92,14 +91,14 @@ We address the following research questions from the assignment requirements:
 
 \section{Background}
 
-% TODO: Expand with more related work
-\textit{Provide an overview of relevant work in the literature related to your task.}
+\textbf{LLM-based Code Generation.} Neural code generation has progressed from early transformer models~\citep{austin2021program} to specialized systems like Codex~\citep{chen2021evaluating}, StarCoder~\citep{li2023starcoderbase}, Code Llama~\citep{roziere2023code}, and Qwen2.5-Coder~\citep{qwen2024}, achieving increasingly strong performance on benchmarks like HumanEval. 
 
-\textbf{LLM-based Code Generation.} Early work on neural code generation~\citep{austin2021program} demonstrated feasibility of program synthesis from natural language. Recent code-specialized models like StarCoder~\citep{li2023starcoderbase}, CodeLlama~\citep{roziere2023code}, and Qwen2.5-Coder~\citep{qwen2024} achieve strong performance on benchmarks like HumanEval~\citep{chen2021evaluating}.
+\textbf{Multi-Agent Systems.} ChatDev~\citep{qian2023chatdev} and MetaGPT~\citep{hong2023metagpt} apply role-based agent collaboration to software development, with specialized agents handling requirements, design, implementation, and testing. These systems demonstrate capabilities for high-level engineering workflows but focus on system design rather than low-level algorithmic correctness.
 
-\textbf{Multi-Agent Systems.} ChatDev~\citep{qian2023chatdev} and MetaGPT~\citep{hong2023metagpt} demonstrate that role-based agent collaboration can improve software development workflows. However, these systems focus on high-level design rather than low-level code correctness.
+\textbf{Iterative Refinement.} Chain-of-thought prompting~\citep{wei2022chain}, self-debugging~\citep{chen2023program}, and reflexion show that iterative refinement can improve LLM outputs. However, recent work~\citep{huang2023large} reveals that self-refinement sometimes degrades solution quality without external feedback, raising questions about when iteration helps versus hurts---a gap our comparative evaluation addresses.
 
-\textbf{Self-Refinement.} Chain-of-thought reasoning~\citep{wei2022chain} and self-debugging~\citep{chen2023program} show that iterative refinement can improve LLM outputs. Our work systematically compares architectures with and without refinement mechanisms.
+Our work provides the first systematic comparison of architectural paradigms (single-shot, iterative pipeline, multi-agent coordination) using controlled conditions to isolate the impact of architectural decisions on code correctness across task types and difficulty levels.
+
 
 % methodology section (imported from external file)
 \input{methodology}
