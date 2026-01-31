@@ -157,7 +157,8 @@ The Planner maintains an explicit state object containing each phase output (int
 \subsubsection{Coder Agent}
 
 
-The Coder agent, implemented in \texttt{coder/} and its \texttt{nodes/} submodule, transforms plans into executable code through six internal phases:
+
+The Coder agent, implemented in \texttt{coder/} and its \texttt{nodes/} submodule, transforms plans into executable code through six internal phases. The agent maintains a structured state object, tracking intermediate outputs and errors, and supports iterative refinement based on critic feedback. The modular design allows for targeted ablation (e.g. chain-of-thought), and facilitates the integration of advanced reasoning strategies or alternative code generation backends. The pipeline enforces strict signature and plan adherence, and includes robust error handling to ensure resilience against LLM or planning failures.
 
 \begin{enumerate}
     \item \textbf{Input Validation}: Verifies signature syntax and plan completeness.
@@ -171,7 +172,8 @@ The Coder agent, implemented in \texttt{coder/} and its \texttt{nodes/} submodul
 \subsubsection{Critic Agent}
 
 
-The Critic agent, structured in \texttt{critic/} and its \texttt{nodes/} submodule, provides rigorous review through four internal phases:
+
+The Critic agent, structured in \texttt{critic/} and its \texttt{nodes/} submodule, provides rigorous review through four internal phases. Each review phase is implemented as a node class, enabling fine-grained control over validation, analysis, and feedback generation. The critic maintains a detailed state object, recording all detected issues, review scores, and actionable feedback. This architecture supports extensible review criteria (e.g., adding new static analysis tools or custom constraints), and enables systematic studies of review depth and prioritization strategies. The critic's feedback is explicitly structured to guide the coder's refinement process, ensuring a clear separation between correctness and quality concerns.
 
 \begin{enumerate}
     \item \textbf{Input Validation}: Ensures code, plan, and signature are present.
