@@ -103,7 +103,7 @@ When correctness issues are found, generates improved code based on review feedb
 \subsection{Multi-Agent System}
 \label{subsec:multi-agent}
 
-The multi-agent approach distributes responsibilities across three specialized agents, each with distinct identity and internal reasoning pipeline.
+The multi-agent approach distributes responsibilities across three specialized agents, following the sequential chain architecture. Each agent has a distinct identity and internal reasoning pipeline.
 
 \begin{figure}[htbp]
     \centering
@@ -138,21 +138,26 @@ The multi-agent approach distributes responsibilities across three specialized a
 
 \subsubsection{Planner Agent}
 
-The Planner serves as the system's architect, transforming task descriptions into comprehensive implementation blueprints through five internal phases:
+
+The Planner is implemented as a \emph{multi-node planning agent} in LangGraph~\cite{langgraph2024}, with each node realized as a class in \texttt{planner/nodes/}. This modularization enables phase-level observability, targeted refinement, and explicit state tracking. The planner transforms a raw user request into a structured, machine-consumable plan (JSON) that serves as the contract between planning and coding, with a quality gate to prevent low-quality plans from propagating downstream.
+
+Concretely, the Planner graph consists of six nodes:
 
 \begin{enumerate}
-    \item \textbf{Intent Analysis}: Extracts core problem, task classification, domain, and success metrics.
-    \item \textbf{Requirements Engineering}: Defines functional/non-functional requirements and enumerates edge cases.
-    \item \textbf{Architecture Design}: Designs components, selects patterns, chooses data structures with complexity analysis.
-    \item \textbf{Implementation Planning}: Creates step-by-step coding instructions with validation checks.
-    \item \textbf{Quality Review}: Scores plan completeness (0--10); threshold $\geq$8 required to proceed.
+    \item \textbf{Intent Analysis}: Extracts the core intent, task type, domain context, success metrics, and assumptions.
+    \item \textbf{Requirements Engineering}: Produces testable functional and non-functional requirements, constraints, and edge cases.
+    \item \textbf{Architecture Design}: Decomposes the solution into components, selects patterns and data structures, and outlines algorithms with complexity notes.
+    \item \textbf{Implementation Planning}: Produces step-by-step coding instructions, validation rules, and representative test cases.
+    \item \textbf{Quality Review}: Scores plan completeness (0--10), enumerates issues and improvements, and sets an approval flag; we require a threshold of $\geq 8$ to proceed.
+    \item \textbf{Consolidation}: Assembles a unified final plan artifact for the downstream Coder agent.
 \end{enumerate}
 
-If the quality score is below threshold, the Planner iterates on specific phases (up to 2 retries).
+The Planner maintains an explicit state object containing each phase output (intent, requirements, architecture, implementation plan, and quality review), as well as metadata such as iteration count and accumulated errors. If the plan is not approved (quality score is below threshold), a bounded refinement loop routes feedback back to the \emph{architecture} node (rather than re-running intent/requirements), for up to two re-planning iterations, after which the system emits a best-effort consolidated plan.
 
 \subsubsection{Coder Agent}
 
-The Coder transforms plans into executable code through six internal phases:
+
+The Coder agent, implemented in \texttt{coder/} and its \texttt{nodes/} submodule, transforms plans into executable code through six internal phases:
 
 \begin{enumerate}
     \item \textbf{Input Validation}: Verifies signature syntax and plan completeness.
@@ -165,7 +170,8 @@ The Coder transforms plans into executable code through six internal phases:
 
 \subsubsection{Critic Agent}
 
-The Critic provides rigorous review through four internal phases:
+
+The Critic agent, structured in \texttt{critic/} and its \texttt{nodes/} submodule, provides rigorous review through four internal phases:
 
 \begin{enumerate}
     \item \textbf{Input Validation}: Ensures code, plan, and signature are present.
@@ -176,7 +182,8 @@ The Critic provides rigorous review through four internal phases:
 
 \subsubsection{Orchestration}
 
-The master workflow coordinates the agents: (1) Planner creates the implementation plan; (2) Coder generates code; (3) code is executed and metrics computed; (4) Critic reviews and provides feedback; (5) if the Critic identifies issues, Coder regenerates with feedback. The loop continues until the Critic approves the code or maximum iterations (default: 3) are reached.
+
+The master workflow, defined at the orchestration level, coordinates the agents by passing explicit state objects between them: (1) Planner creates the implementation plan; (2) Coder generates code; (3) code is executed and metrics computed; (4) Critic reviews and provides feedback; (5) if the Critic identifies issues, Coder regenerates with feedback. The loop continues until the Critic approves the code or maximum iterations (default: 3) are reached. This design ensures traceability, reproducibility, and ease of extension for future research.
 
 %==============================================================================
 \subsection{Shared Infrastructure}
